@@ -2,38 +2,43 @@
 const { argv } = require("node:process");
 const fs = require("node:fs/promises");
 
+const { GenericErrors }= require("./util/error");
+
 const commands = argv.slice(2);
 
 async function HandleUpdateTasks() {
   try {
     const jsonBuffer = await HandleReadTaskFile();
 
-    if (commands[1] && !isNaN(commands[1]) && commands[2]) {
-      const updatedTasks = jsonBuffer.map((item, index) => {
-        if (jsonBuffer[index].id === Number(commands[1])) {
-          item.name = commands[2];
+    if (commands[2] && !isNaN(commands[2]) && commands[3]) {
+      const updatedTasks = jsonBuffer[0][HandleGetCategory()].map(
+        (item, idx, arr) => {
+        if (arr[idx].id === Number(commands[2])) {
+          item.name = commands[3];
           item.updateAt = HandleGetData();
         }
 
         return item;
       });
 
-      await fs.writeFile("tasks.json", JSON.stringify(updatedTasks, null, 2));
-      console.log(`task with id ${commands[1]} successfully updated`);
+      jsonBuffer[0][HandleGetCategory()] = updatedTasks;
+
+      await fs.writeFile("tasks.json", JSON.stringify(jsonBuffer, null, 2));
+      console.log(`task with id ${commands[2]} successfully updated`);
     } else {
       // possible commons errors
       if (!commands[1]) {
-        throw new Error("The ID was not specified");
+        throw new GenericErrors('[Error]: The "id" of task does not specified;', '[Type of Error]: syntax')
       } else if (!commands[2]) {
-        throw new Error("Name of the tasks wasn't specified");
+        throw new GenericErrors("[Error]: Name of the tasks wasn't specified;", '[Type of Error]: syntax');
       } else if (isNaN(commands[1])) {
-        throw new Error("[SYNTAX ERROR]: Please, the ID shall be a number");
+        throw new GenericErrors("[Error]: Please, the ID shall be a number;", '[Type of Error]: syntax');
       }
       // catch all adjacent errors
-      throw new Error("[Unknow Error]: Please, try again");
+      throw new GenericErrors("[Error]: Please, try again;", '[Type of Error]: unknown');
     }
   } catch (err) {
-    console.error(err);
+    console.error(err.message, err.type);
     process.exit(1);
   }
 }
@@ -60,16 +65,16 @@ async function HandleAddTasks() {
       );
     } else {
       if (!commands[2]) {
-        throw new Error(
-          `Name of the task is empty! Please, add some name to it.`
+        throw new GenericErrors(
+          `[Error]: Name of the task is empty! Please, add some name to it.`, '[Type of Error]: Syntax'
         );
       }
     }
   } catch (err) {
-    console.error("[ERROR]:", err);
+    console.error(err.message, err.type);
     process.exit(1);
   }
-}
+};
 async function HandleDeleteTask() {
   try {
     const jsonBuffer = await HandleReadTaskFile();
@@ -91,13 +96,13 @@ async function HandleDeleteTask() {
 
       await fs.writeFile("tasks.json", JSON.stringify(jsonBuffer, null, 2));
     } else {
-      throw new Error("You didn't pass the ID of the task");
+      throw new GenericErrors("[Errror]: You didn't pass the ID of the task", '[Type of Error]: Syntax');
     }
   } catch (deleteTaskErr) {
-    console.error(deleteTaskErr);
+    console.error(deleteTaskErr.message, deleteTaskErr.type);
     process.exit(1);
   }
-}
+};
 async function HandleListTasks() {
   try {
     function HandleEmptyArray(arr) {
@@ -148,12 +153,12 @@ async function HandleListTasks() {
         console.table(HandleEmptyArray(inProgressArray));
         break;
       default:
-        throw new Error(
-          `[UNKNOW COMMAND]: "${commands[2]}". Please, use: 'done', 'in-progress' or 'todo'`
+        throw new GenericErrors(
+          `Unknow "${commands[2]}". Please, use: 'done', 'in-progress' or 'todo'`, '[Type of Error]: Syntax'
         );
     }
   } catch (err) {
-    console.error("The following error occurred:", err);
+    console.error(err.message, err.type);
     process.exit(1);
   }
 }
@@ -186,12 +191,12 @@ async function HandleSetTaskStatus(status) {
       jsonBuffer[0][HandleGetCategory()] = updatedArray;
       await fs.writeFile("tasks.json", JSON.stringify(jsonBuffer, null, 2));
     } else {
-      throw new Error(
-        `[SYNTAX ERROR]: Empty 'id'. Please, specific the task 'id'`
+      throw new GenericErrors(
+        `Empty 'id'. Please, specific the task 'id'`, '[Type of Error]: Syntax'
       );
     }
   } catch (err) {
-    console.error(err);
+    console.error(err.message, err.type);
     process.exit(1);
   }
 }
@@ -223,17 +228,17 @@ async function HandleSetTaskDescription() {
       await fs.writeFile("tasks.json", JSON.stringify(jsonBuffer, null, 2));
     } else {
       if (!commands[2]) {
-        throw new Error(`[SYNTAX ERROR]: Empty description`);
+        throw new GenericErrors(`Empty description`, '[Type of Error]: Syntax');
       } else if (!commands[1]) {
-        throw new Error(`[SYNTAX ERROR]: You forgot the id of the task`);
+        throw new GenericErrors(`You forgot the id of the task`, '[Type of Error]: Syntax');
       } else {
-        throw new Error(
-          `[UNKNOWN ERROR]: Please, check if you wrote correctly and try again.`
+        throw new GenericErrors(
+          `Please, check if you wrote correctly and try again.`, '[Type of Error]: Unknown'
         );
       }
     }
   } catch (err) {
-    console.error(err);
+    console.error(err.message, err.type);
     process.exit(1);
   }
 };
@@ -289,15 +294,15 @@ async function HandleSetTypeOfTask() {
       
     } else {
       if(!commands[2] || isNaN(commands[2])) {
-        throw new Error('You have forgotten of pass the id of the task!')
+        throw new GenericErrors('You have forgotten of pass the id of the task!', '[Type of Error]: Syntax')
       } else if(!commands[3]) {
-        throw new Error('You have forgotten of pass the name of the type!')
+        throw new GenericErrors('You have forgotten of pass the name of the type!', '[Type of Error]: Syntax')
       } else {
-        throw new Error('[UNKNOWN ERROR]');
+        throw new GenericErrors('thing it is wrong', '[Type of Error]: Unknown');
       }
     }
   } catch(err) {
-    console.error('occurs a error:', err);
+    console.error(err.message, err.type);
     process.exit(1);
   }
 }
@@ -311,8 +316,6 @@ async function HandleSetDataConclusion() {
           if(Number(commands[2]) === arr[idx].id) {
             item.finishAt = commands[3];
             item.updateAt = HandleGetData();
-            console.log(commands[3])
-            console.log(item.finishAt)
           };
 
           return item;
@@ -324,15 +327,15 @@ async function HandleSetDataConclusion() {
       console.log(`data defined to ${commands[2]}`)
     } else {
       if(!commands[2] || isNaN(commands[2])) {
-        throw new Error('You have forgotten of pass the ID of the task');
+        throw new GenericErrors('You have forgotten of pass the ID of the task' ,'[Type of Error]: Syntax');
       } else if(!commands[3]) {
-        throw new Error('You have forgotten of pass the data of conclusion to task');        
+        throw new GenericErrors('You have forgotten of pass the data of conclusion to task' ,'[Type of Error]: Syntax');        
       } else {
-        throw new Error('[UNKNOWN ERRROR]')
+        throw new GenericErrors('Ops...Any it is wrong', '[Type of Error]: Syntax')
       }
     }
   } catch(err) {
-    console.error('occurs a error:', err);
+    console.error(err.message, err.type);
     process.exit(1);
   }
 }
