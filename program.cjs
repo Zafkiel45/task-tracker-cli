@@ -37,7 +37,6 @@ async function HandleUpdateTasks() {
     process.exit(1);
   }
 }
-
 async function HandleAddTasks() {
   try {
     const jsonBuffer = await HandleReadTaskFile();
@@ -237,6 +236,105 @@ async function HandleSetTaskDescription() {
     console.error(err);
     process.exit(1);
   }
+};
+async function HandleDeleteAllTasks() {
+  try {
+    const jsonBuffer = await HandleReadTaskFile();
+
+    jsonBuffer[0][HandleGetCategory()] = [];
+    await fs.writeFile('tasks.json', JSON.stringify(jsonBuffer, null, 2));
+    console.log(`All tasks of ${HandleGetCategory()} successfully deleted`);
+  } catch(err) {
+    console.error('occur a error:', err);
+    process.exit(1);
+  }
+};
+async function HandleMarkAllTasks(status) {
+  try {
+    const jsonBuffer = await HandleReadTaskFile();
+    const processedArray = jsonBuffer[0][HandleGetCategory()].map((item) => {
+      item.status = status;
+
+      return item;
+    });
+
+    jsonBuffer[0][HandleGetCategory()] = processedArray;
+    await fs.writeFile('tasks.json', JSON.stringify(jsonBuffer, null, 2));
+    console.log(`all tasks of ${HandleGetCategory()} marked as ${status} successfully`);
+
+  } catch(err) {
+    console.error('occur a error:', err);
+    process.exit(1);
+  }
+}
+async function HandleSetTypeOfTask() {
+  try {
+    const jsonBuffer = await HandleReadTaskFile();
+
+    if(commands[2] && commands[3]) {
+      const processedArray = jsonBuffer[0][HandleGetCategory()].map((item, idx, arr) => {
+          if(Number(commands[2]) === arr[idx].id) {
+            item.type = commands[3];
+          };
+
+          return item;
+      });
+
+  
+      console.log('type successfully updated');
+
+      jsonBuffer[0][HandleGetCategory()] = processedArray;
+      
+      await fs.writeFile('tasks.json', JSON.stringify(jsonBuffer, null, 2));
+      
+    } else {
+      if(!commands[2] || isNaN(commands[2])) {
+        throw new Error('You have forgotten of pass the id of the task!')
+      } else if(!commands[3]) {
+        throw new Error('You have forgotten of pass the name of the type!')
+      } else {
+        throw new Error('[UNKNOWN ERROR]');
+      }
+    }
+  } catch(err) {
+    console.error('occurs a error:', err);
+    process.exit(1);
+  }
+}
+async function HandleSetDataConclusion() {
+  try {
+    const jsonBuffer = await HandleReadTaskFile();
+
+    if(commands[2] && commands[3]) {
+      const processedArray = jsonBuffer[0][HandleGetCategory()].map(
+        (item, idx, arr) => {
+          if(Number(commands[2]) === arr[idx].id) {
+            item.finishAt = commands[3];
+            item.updateAt = HandleGetData();
+            console.log(commands[3])
+            console.log(item.finishAt)
+          };
+
+          return item;
+      });
+
+      jsonBuffer[0][HandleGetCategory()] = processedArray;
+
+      await fs.writeFile('tasks.json', JSON.stringify(jsonBuffer, null, 2));
+      console.log(`data defined to ${commands[2]}`)
+    } else {
+      if(!commands[2] || isNaN(commands[2])) {
+        throw new Error('You have forgotten of pass the ID of the task');
+      } else if(!commands[3]) {
+        throw new Error('You have forgotten of pass the data of conclusion to task');        
+      } else {
+        throw new Error('[UNKNOWN ERRROR]')
+      }
+    }
+  } catch(err) {
+    console.error('occurs a error:', err);
+    process.exit(1);
+  }
 }
 // utlity function
 function HandleGenerateTasksId(dataArray) {
@@ -251,7 +349,7 @@ async function HandleReadTaskFile() {
     } catch (readErr) {
       if (readErr.code === "ENOENT") {
         const tasksStructure = [
-          { daily: [], study: [], entreteniment: [], revision: [] },
+          { daily: [], study: [], entertainment: [], revision: [] },
         ];
         await fs.writeFile(
           "tasks.json",
@@ -306,9 +404,30 @@ if(commands[0]) {
       case "description":
         HandleSetTaskDescription();
         break;
+      case "delete-all":
+        HandleDeleteAllTasks();
+        break;
+      case "mark-all-done":
+        HandleMarkAllTasks('done');
+        break;
+      case "mark-all-todo":
+        HandleMarkAllTasks('todo');
+        break;
+      case "mark-all-in-progress":
+        HandleMarkAllTasks('in-progress');
+        break;
+      case "type":
+        HandleSetTypeOfTask();
+        break;
+      case "data-conclusion":
+        HandleSetDataConclusion();
+        break;
       default:
-        console.log("OCORREU UM ERRO FATAL");
+        console.log("Invalid command. Use one of the following: add, update,");
+        console.log("mark-done, mark-in-progress, mark-todo, delete-task,");
+        console.log("list, description, mark-all-done, mark-all-in-progress")
+        console.log("mark-all-todo, delete-all, type, data-conclusion")
     }
 } else {
-    console.error('please, specific list with the first command: "daily", "study", "entreteniment", "revision"')
+    console.error('please, specific list with the first command: "daily", "study", "entertainment", "revision"')
 }
