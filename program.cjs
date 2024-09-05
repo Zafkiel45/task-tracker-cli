@@ -5,26 +5,20 @@ const fs = require("node:fs/promises");
 const { GenericErrors }= require("./util/error");
 
 const commands = argv.slice(2);
+const TASK_LIST = commands[0];
 
 async function HandleUpdateTasks() {
   try {
-    const jsonBuffer = await HandleReadTaskFile();
+    const JSON_BUFFER = await HandleReadTaskFile();
 
     if (commands[2] && !isNaN(commands[2]) && commands[3]) {
-      const updatedTasks = jsonBuffer[0][HandleGetCategory()].map(
-        (item, idx, arr) => {
-        if (arr[idx].id === Number(commands[2])) {
-          item.name = commands[3];
-          item.updateAt = HandleGetData();
-        }
+        HandleUpdateElementAttribute.call(JSON_BUFFER[0][TASK_LIST], commands[3], "name");
+        await HandleWriteFile.call(JSON_BUFFER);
 
-        return item;
-      });
+        const elementFindOut = HandleFindElement.call(JSON_BUFFER[0][TASK_LIST]);
 
-      jsonBuffer[0][HandleGetCategory()] = updatedTasks;
-
-      await fs.writeFile("tasks.json", JSON.stringify(jsonBuffer, null, 2));
-      console.log(`task with id ${commands[2]} successfully updated`);
+        console.log(`The task with id ${commands[2]} was successfully updated`);
+        console.log(`The name of task is: ${elementFindOut.name}`);
     } else {
       // possible commons errors
       if (!commands[1]) {
@@ -44,24 +38,24 @@ async function HandleUpdateTasks() {
 }
 async function HandleAddTasks() {
   try {
-    const jsonBuffer = await HandleReadTaskFile();
+    const JSON_BUFFER = await HandleReadTaskFile();
 
     if (commands[2]) {
-      jsonBuffer[0][HandleGetCategory()].push({
+      JSON_BUFFER[0][TASK_LIST].push({
         name: String(commands[2]),
-        id: await HandleGenerateTasksId(jsonBuffer[0][HandleGetCategory()]),
+        id: HandleGenerateTasksId(JSON_BUFFER[0][TASK_LIST]),
         description: "",
         status: "todo",
-        createdAt: HandleGetData(),
-        updateAt: HandleGetData(),
+        createdAt: HandleGetDate(),
+        updateAt: HandleGetDate(),
         type: "",
         finishAt: "",
       });
 
-      await fs.writeFile("tasks.json", JSON.stringify(jsonBuffer, null, 2));
+      await HandleWriteFile.call(JSON_BUFFER);
       console.info(
         "task successfully added with ID:",
-        (await HandleGenerateTasksId(jsonBuffer[0][HandleGetCategory()])) - 1
+        (HandleGenerateTasksId(JSON_BUFFER[0][TASK_LIST])) - 1
       );
     } else {
       if (!commands[2]) {
@@ -77,24 +71,23 @@ async function HandleAddTasks() {
 };
 async function HandleDeleteTask() {
   try {
-    const jsonBuffer = await HandleReadTaskFile();
+    const JSON_BUFFER = await HandleReadTaskFile();
 
     if (commands[2]) {
-      const category = commands[0];
-
-      const tasksFiltred = jsonBuffer[0][category].filter((item) => {
+      const tasksFiltred = JSON_BUFFER[0][TASK_LIST].filter((item) => {
         return item.id !== Number(commands[2]);
       });
 
-      if (tasksFiltred.length === jsonBuffer[0][category].length) {
+      if (tasksFiltred.length === JSON_BUFFER[0][TASK_LIST].length) {
         console.log("the task do not exist");
       } else {
         console.warn(`task with id: ${commands[2]} successfully deleted`);
+        console.warn(`The task was of: ${commands[0]}`);  
       }
 
-      jsonBuffer[0][category] = tasksFiltred;
-
-      await fs.writeFile("tasks.json", JSON.stringify(jsonBuffer, null, 2));
+      JSON_BUFFER[0][TASK_LIST] = tasksFiltred;
+      await HandleWriteFile.call(JSON_BUFFER);
+      
     } else {
       throw new GenericErrors("[Errror]: You didn't pass the ID of the task", '[Type of Error]: Syntax');
     }
@@ -162,34 +155,18 @@ async function HandleListTasks() {
     process.exit(1);
   }
 }
-async function HandleSetTaskStatus(status) {
+async function HandleSetTaskStatus(sts) {
   try {
-    const jsonBuffer = await HandleReadTaskFile();
+    const JSON_BUFFER = await HandleReadTaskFile();
 
     if (commands[2]) {
-      const updatedArray = jsonBuffer[0][HandleGetCategory()].map(
-        (item, index, arr) => {
-          if (arr[index].id === Number(commands[2])) {
-            item.status = status;
-            item.updateAt = HandleGetData();
-          }
-          return item;
-        }
-      );
+      await HandleUpdateElementAttribute.call(JSON_BUFFER[0][TASK_LIST], sts, "status");
+      HandleFindElement.call(JSON_BUFFER[0][TASK_LIST]);
 
-      if (
-        updatedArray.status ===
-        jsonBuffer[0][HandleGetCategory()][commands[2]].status
-      ) {
-        console.log(
-          "The task does not exist or it   the same the status passed"
-        );
-      } else {
-        console.log(`task with ID: ${commands[2]} successfully updated!`);
-      }
-      // updating the specific category in jsonBuffer to preserve structure
-      jsonBuffer[0][HandleGetCategory()] = updatedArray;
-      await fs.writeFile("tasks.json", JSON.stringify(jsonBuffer, null, 2));
+      console.log(`The task of '${commands[0]}' with the ID ${commands[2]} successfully updated'`);
+      console.log(`Name of task updated: ${updatedElement.name}`);
+      // update de json file
+      await HandleWriteFile.call(JSON_BUFFER);
     } else {
       throw new GenericErrors(
         `Empty 'id'. Please, specific the task 'id'`, '[Type of Error]: Syntax'
@@ -202,30 +179,17 @@ async function HandleSetTaskStatus(status) {
 }
 async function HandleSetTaskDescription() {
   try {
-    const jsonBuffer = await HandleReadTaskFile();
+    const JSON_BUFFER = await HandleReadTaskFile();
 
     if (commands[2] && commands[3]) {
-      const updatedArray = jsonBuffer[0][HandleGetCategory()].map(
-        (item, index, arr) => {
-          if (arr[index].id === Number(commands[2])) {
-            item.description = commands[3];
-            item.updateAt = HandleGetData();
-          }
-          return item;
-        }
-      );
 
-      if (
-        updatedArray.description ===
-        jsonBuffer[0][HandleGetCategory()][commands[2]].description
-      ) {
-        console.log("Same description passed");
-      } else {
-        console.log(`task with ID: ${commands[2]} successfully updated!`);
-      }
+      HandleUpdateElementAttribute.call(JSON_BUFFER[0][TASK_LIST], commands[3], "description");
+      const findOutElement = HandleFindElement.call(JSON_BUFFER[0][TASK_LIST]);
+ 
+      console.log(`task with ID: ${commands[2]} successfully updated!`);
+      console.log(`The name of task is: ${findOutElement.name}`);
 
-      jsonBuffer[0][HandleGetCategory()] = updatedArray;
-      await fs.writeFile("tasks.json", JSON.stringify(jsonBuffer, null, 2));
+      HandleWriteFile.call(JSON_BUFFER);
     } else {
       if (!commands[2]) {
         throw new GenericErrors(`Empty description`, '[Type of Error]: Syntax');
@@ -244,29 +208,23 @@ async function HandleSetTaskDescription() {
 };
 async function HandleDeleteAllTasks() {
   try {
-    const jsonBuffer = await HandleReadTaskFile();
+    const JSON_BUFFER = await HandleReadTaskFile();
 
-    jsonBuffer[0][HandleGetCategory()] = [];
-    await fs.writeFile('tasks.json', JSON.stringify(jsonBuffer, null, 2));
-    console.log(`All tasks of ${HandleGetCategory()} successfully deleted`);
+    JSON_BUFFER[0][HandleGetCategory()] = [];
+
+    HandleWriteFile.call(JSON_BUFFER);
+    console.log(`All tasks of ${TASK_LIST} successfully deleted`);
   } catch(err) {
     console.error('occur a error:', err);
     process.exit(1);
   }
 };
-async function HandleMarkAllTasks(status) {
+async function HandleMarkAllTasks(sts) {
   try {
-    const jsonBuffer = await HandleReadTaskFile();
-    const processedArray = jsonBuffer[0][HandleGetCategory()].map((item) => {
-      item.status = status;
-
-      return item;
-    });
-
-    jsonBuffer[0][HandleGetCategory()] = processedArray;
-    await fs.writeFile('tasks.json', JSON.stringify(jsonBuffer, null, 2));
-    console.log(`all tasks of ${HandleGetCategory()} marked as ${status} successfully`);
-
+    const JSON_BUFFER = await HandleReadTaskFile();
+    HandleUpdateElementAttribute.call(JSON_BUFFER[0][TASK_LIST], sts, "status");
+    HandleWriteFile.call(JSON_BUFFER);
+    console.log(`all tasks of ${HandleGetCategory()} marked as ${sts} successfully`);
   } catch(err) {
     console.error('occur a error:', err);
     process.exit(1);
@@ -274,24 +232,15 @@ async function HandleMarkAllTasks(status) {
 }
 async function HandleSetTypeOfTask() {
   try {
-    const jsonBuffer = await HandleReadTaskFile();
+    const JSON_BUFFER = await HandleReadTaskFile();
 
     if(commands[2] && commands[3]) {
-      const processedArray = jsonBuffer[0][HandleGetCategory()].map((item, idx, arr) => {
-          if(Number(commands[2]) === arr[idx].id) {
-            item.type = commands[3];
-          };
+      HandleUpdateElementAttribute.call(JSON_BUFFER[0][TASK_LIST], commands[3], "type");
+      HandleWriteFile.call(JSON_BUFFER);
 
-          return item;
-      });
-
-  
-      console.log('type successfully updated');
-
-      jsonBuffer[0][HandleGetCategory()] = processedArray;
-      
-      await fs.writeFile('tasks.json', JSON.stringify(jsonBuffer, null, 2));
-      
+      const elementFindOut = HandleFindElement.call(JSON_BUFFER[0][TASK_LIST]);
+      console.log(`The task with ID ${commands[2]} was successfully updated`);
+      console.log(`THe name of task is: ${elementFindOut.name}`);
     } else {
       if(!commands[2] || isNaN(commands[2])) {
         throw new GenericErrors('You have forgotten of pass the id of the task!', '[Type of Error]: Syntax')
@@ -306,25 +255,18 @@ async function HandleSetTypeOfTask() {
     process.exit(1);
   }
 }
-async function HandleSetDataConclusion() {
+async function HandleSetDateConclusion() {
   try {
-    const jsonBuffer = await HandleReadTaskFile();
+    const JSON_BUFFER = await HandleReadTaskFile();
 
     if(commands[2] && commands[3]) {
-      const processedArray = jsonBuffer[0][HandleGetCategory()].map(
-        (item, idx, arr) => {
-          if(Number(commands[2]) === arr[idx].id) {
-            item.finishAt = commands[3];
-            item.updateAt = HandleGetData();
-          };
+      HandleUpdateElementAttribute.call(JSON_BUFFER[0][TASK_LIST], commands[3], "finishAt");
+      HandleWriteFile.call(JSON_BUFFER);
 
-          return item;
-      });
+      const elementFindOut = HandleFindElement.call(JSON_BUFFER[0][TASK_LIST]);
 
-      jsonBuffer[0][HandleGetCategory()] = processedArray;
-
-      await fs.writeFile('tasks.json', JSON.stringify(jsonBuffer, null, 2));
-      console.log(`data defined to ${commands[2]}`)
+      console.log(`the task wit id ${commands[2]} was successfully updated`);
+      console.log(`the task name is: ${elementFindOut.name}`);
     } else {
       if(!commands[2] || isNaN(commands[2])) {
         throw new GenericErrors('You have forgotten of pass the ID of the task' ,'[Type of Error]: Syntax');
@@ -343,7 +285,7 @@ async function HandleSetDataConclusion() {
 function HandleGenerateTasksId(dataArray) {
   let maxId = dataArray.reduce((max, item) => Math.max(max, item.id || 0), 0);
   return maxId + 1;
-}
+};
 async function HandleReadTaskFile() {
   try {
     try {
@@ -367,8 +309,8 @@ async function HandleReadTaskFile() {
     console.error("Error reading file:", err);
     process.exit(1);
   }
-}
-function HandleGetData() {
+};
+function HandleGetDate() {
   const dateObject = new Date();
 
   const currentData = dateObject.getDate();
@@ -376,11 +318,29 @@ function HandleGetData() {
   const currentYear = dateObject.getFullYear();
 
   return `${currentData}/${currentMonth}/${currentYear}`;
-}
+};
 function HandleGetCategory() {
   return commands[0];
+};
+function HandleUpdateElementAttribute(attribute, property) {
+  for(element of this) {
+    if(element.id === Number(commands[2])) {
+      element[property] = attribute;
+      element.updateAt = HandleGetDate();
+      break;
+    };
+  };
+};
+async function HandleWriteFile() {
+  await fs.writeFile('tasks.json', JSON.stringify(this, null, 2));
 }
+function HandleFindElement() {
+  const element = this.find((item) => {
+    return item.id === Number(commands[2])
+  });
 
+  return element;
+}
 if(commands[0]) {
     switch (commands[1]) {
       case "add":
@@ -422,8 +382,8 @@ if(commands[0]) {
       case "type":
         HandleSetTypeOfTask();
         break;
-      case "data-conclusion":
-        HandleSetDataConclusion();
+      case "date-conclusion":
+        HandleSetDateConclusion();
         break;
       default:
         console.log("Invalid command. Use one of the following: add, update,");
