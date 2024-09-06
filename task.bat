@@ -29,7 +29,8 @@ if "%2" == "mark-all-done" goto execute
 if "%2" == "mark-all-todo" goto execute
 if "%2" == "mark-all-in-progress" goto execute
 if "%2" == "type" goto execute
-if "%2" == "data-conclusion" goto execute
+if "%2" == "date-conclusion" goto execute
+if "%2" == "date-conclusion-all" goto execute
 
 REM If no valid command was found, display an error message and exit
 echo Invalid command. Use one of the following: add, update, mark-done, mark-in-progress, mark-todo, delete-task, list, description, delete-all, mark-all-done, mark-all-todo, mark-all-in-progress, type, data-conclusion.
