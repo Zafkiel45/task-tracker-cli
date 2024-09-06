@@ -48,8 +48,10 @@ async function HandleAddTasks() {
         status: "todo",
         createdAt: HandleGetDate(),
         updateAt: HandleGetDate(),
+        lastCompleteDate: "",
         type: "",
         finishAt: "",
+        streak: 0,
       });
 
       await HandleWriteFile.call(JSON_BUFFER);
@@ -161,10 +163,10 @@ async function HandleSetTaskStatus(sts) {
 
     if (commands[2]) {
       await HandleUpdateElementAttribute.call(JSON_BUFFER[0][TASK_LIST], sts, "status");
-      HandleFindElement.call(JSON_BUFFER[0][TASK_LIST]);
+      const elementFindOut = HandleFindElement.call(JSON_BUFFER[0][TASK_LIST]);
 
       console.log(`The task of '${commands[0]}' with the ID ${commands[2]} successfully updated'`);
-      console.log(`Name of task updated: ${updatedElement.name}`);
+      console.log(`Name of task updated: ${elementFindOut.name}`);
       // update de json file
       await HandleWriteFile.call(JSON_BUFFER);
     } else {
@@ -222,7 +224,11 @@ async function HandleDeleteAllTasks() {
 async function HandleMarkAllTasks(sts) {
   try {
     const JSON_BUFFER = await HandleReadTaskFile();
-    HandleUpdateElementAttribute.call(JSON_BUFFER[0][TASK_LIST], sts, "status");
+
+    for(element of JSON_BUFFER[0][TASK_LIST]) {
+      element.status = sts;
+    };
+
     HandleWriteFile.call(JSON_BUFFER);
     console.log(`all tasks of ${HandleGetCategory()} marked as ${sts} successfully`);
   } catch(err) {
@@ -322,25 +328,37 @@ function HandleGetDate() {
 function HandleGetCategory() {
   return commands[0];
 };
-function HandleUpdateElementAttribute(attribute, property) {
+function HandleUpdateElementAttribute(attr, property) {
   for(element of this) {
     if(element.id === Number(commands[2])) {
-      element[property] = attribute;
+
+      const { lastCompleteDate } = element
+
+      element[property] = attr;
       element.updateAt = HandleGetDate();
+
+      if(attr === 'done' && HandleStreakOfTasks(lastCompleteDate)) {
+        element.streak += 1 
+        element.lastCompleteDate = HandleGetDate();
+      };
       break;
     };
   };
 };
 async function HandleWriteFile() {
   await fs.writeFile('tasks.json', JSON.stringify(this, null, 2));
-}
+};
 function HandleFindElement() {
   const element = this.find((item) => {
     return item.id === Number(commands[2])
   });
 
   return element;
+};
+function HandleStreakOfTasks(lastDate) {
+ return lastDate !== HandleGetDate() ? true:false;
 }
+
 if(commands[0]) {
     switch (commands[1]) {
       case "add":
