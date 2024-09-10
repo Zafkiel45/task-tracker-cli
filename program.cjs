@@ -241,7 +241,7 @@ async function HandleDeleteAllTasks() {
   try {
     const JSON_BUFFER = await HandleReadTaskFile();
 
-    JSON_BUFFER[0][HandleGetCategory()] = [];
+    JSON_BUFFER[0][TASK_LIST] = [];
 
     HandleWriteFile.call(JSON_BUFFER);
     console.log(`All tasks of ${TASK_LIST} successfully deleted`);
@@ -260,7 +260,7 @@ async function HandleMarkAllTasks(sts) {
 
     HandleWriteFile.call(JSON_BUFFER);
     console.log(
-      `all tasks of ${HandleGetCategory()} marked as ${sts} successfully`
+      `all tasks of ${TASK_LIST} marked as ${sts} successfully`
     );
   } catch (err) {
     console.error("occur a error:", err.trim());
@@ -383,7 +383,7 @@ async function HandleReadTaskFile() {
     } catch (readErr) {
       if (readErr.code === "ENOENT") {
         const tasksStructure = [
-          { daily: [], study: [], entertainment: [], revision: [] },
+          { daily: [], study: [], entertainment: [], revision: [], habitDaily: [], habitWeekly: []},
         ];
         await fs.writeFile(
           "tasks.json",
@@ -407,10 +407,7 @@ function HandleGetDate() {
   const currentYear = dateObject.getFullYear();
 
   return `${currentData}/${currentMonth}/${currentYear}`;
-}
-function HandleGetCategory() {
-  return commands[0];
-}
+};
 function HandleUpdateElementAttribute(attr, property) {
   for (element of this) {
     if (element.id === Number(commands[2])) {

@@ -9,8 +9,13 @@ if "%1" == "daily" (
     goto checkCommand
 ) else if "%1" == "revision" (
     goto checkCommand
+) else if "%1" == "habitDaily" (
+    goto checkCommand
+) else if "%1" == "habitWeekly" (
+    goto checkCommand
 ) else (
-    echo Invalid category. Please use: daily, study, entreteniment, or revision.
+    echo Invalid category. Please use: daily, study, entreteniment, or revision
+    echo habitDaily, habitWeekly.
     exit /b
 )
 
