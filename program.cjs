@@ -107,7 +107,6 @@ async function HandleAddTasks() {
       JSON_BUFFER[0][TASK_LIST].push({
         name: String(commands[2]),
         id: HandleGenerateTasksId(JSON_BUFFER[0][TASK_LIST]),
-        description: "",
         status: "todo",
         createdAt: HandleGetDate(),
         updateAt: HandleGetDate(),
@@ -169,48 +168,33 @@ async function HandleListTasks() {
     function HandleEmptyArray(arr) {
       return arr.length === 0 ? "without tasks" : arr;
     }
-    function HandleFormaterDescription(arr) {
-      return arr.map((item) => {
-        if (item.description === "") {
-          item.description = "empty";
-        } else {
-          item.description = item.description.slice(0, 20) + "...";
-        }
-
-        return item;
-      });
-    }
 
     const jsonBuffer = await HandleReadTaskFile();
 
     switch (commands[2]) {
       case undefined:
-        const allTasks = HandleFormaterDescription(
-          jsonBuffer[0][HandleGetCategory()]
-        );
+        const allTasks = jsonBuffer[0][TASK_LIST]
         console.table(allTasks);
         break;
       case "todo":
-        const todoArrayFiltred = jsonBuffer[0][HandleGetCategory()].filter(
+        const todoArrayFiltred = jsonBuffer[0][TASK_LIST].filter(
           (item) => item.status === "todo"
         );
-        const todoArray = HandleFormaterDescription(todoArrayFiltred);
+        const todoArray = todoArrayFiltred
         console.table(HandleEmptyArray(todoArray));
         break;
       case "done":
-        const doneArrayFiltred = jsonBuffer[0][HandleGetCategory()].filter(
+        const doneArrayFiltred = jsonBuffer[0][TASK_LIST].filter(
           (item) => item.status === "done"
         );
-        const doneArray = HandleFormaterDescription(doneArrayFiltred);
+        const doneArray = doneArrayFiltred;
         console.table(HandleEmptyArray(doneArray));
         break;
       case "in-progress":
-        const inProgressArrayFiltred = jsonBuffer[0][
-          HandleGetCategory()
-        ].filter((item) => item.status === "in-progress");
-        const inProgressArray = HandleFormaterDescription(
-          inProgressArrayFiltred
+        const inProgressArrayFiltred = jsonBuffer[0][TASK_LIST].filter(
+          (item) => item.status === "in-progress"
         );
+        const inProgressArray = inProgressArrayFiltred;
         console.table(HandleEmptyArray(inProgressArray));
         break;
       default:
@@ -252,43 +236,7 @@ async function HandleSetTaskStatus(sts) {
     console.error(err.message, err.type);
     process.exit(1);
   }
-}
-async function HandleSetTaskDescription() {
-  try {
-    const JSON_BUFFER = await HandleReadTaskFile();
-
-    if (commands[2] && commands[3]) {
-      HandleUpdateElementAttribute.call(
-        JSON_BUFFER[0][TASK_LIST],
-        commands[3],
-        "description"
-      );
-      const findOutElement = HandleFindElement.call(JSON_BUFFER[0][TASK_LIST]);
-
-      console.log(`task with ID: ${commands[2]} successfully updated!`);
-      console.log(`The name of task is: ${findOutElement.name}`);
-
-      HandleWriteFile.call(JSON_BUFFER);
-    } else {
-      if (!commands[2]) {
-        throw new GenericErrors(`Empty description`, "[Type of Error]: Syntax");
-      } else if (!commands[1]) {
-        throw new GenericErrors(
-          `You forgot the id of the task`,
-          "[Type of Error]: Syntax"
-        );
-      } else {
-        throw new GenericErrors(
-          `Please, check if you wrote correctly and try again.`,
-          "[Type of Error]: Unknown"
-        );
-      }
-    }
-  } catch (err) {
-    console.error(err.message, err.type);
-    process.exit(1);
-  }
-}
+};
 async function HandleDeleteAllTasks() {
   try {
     const JSON_BUFFER = await HandleReadTaskFile();
@@ -516,9 +464,6 @@ if (commands[0]) {
     case "mark-in-progress":
       HandleSetTaskStatus("in-progress").then(() => HandleBeckup())
       break;
-    case "description":
-      HandleSetTaskDescription().then(() => HandleBeckup())
-      break;
     case "delete-all":
       HandleDeleteAllTasks().then(() => HandleBeckup())
       break;
@@ -543,7 +488,7 @@ if (commands[0]) {
     default:
       console.log("Invalid command. Use one of the following: add, update,");
       console.log("mark-done, mark-in-progress, mark-todo, delete-task,");
-      console.log("list, description, mark-all-done, mark-all-in-progress");
+      console.log("list, mark-all-done, mark-all-in-progress");
       console.log("mark-all-todo, delete-all, type, data-conclusion");
   }
 } else {

@@ -17,7 +17,6 @@ The organization of tasks is as:
       {
         "name": "",
         "id": 4,
-        "description": "",
         "status": "todo",
         "createdAt": "2/9/2024",
         "updateAt": "2/9/2024",
@@ -110,14 +109,6 @@ This will change the task `status` with `id=10` to `in-progress` in `entertaimne
 node program.cjs entertaimnent mark-todo 6
 ```
 This will change the task `status` with `id=6` to `todo`.
-
-## Add description:
-
-Task can have a `description`. The following command add or change the `description`:
-```cmd
-node program.cjs entertaimnent description 4 'this is my beautiful description'
-```
-This will change or add the task `description` with `id=4` to `'this is my beautiful description'`.
 
 ## deleting all tasks:
 

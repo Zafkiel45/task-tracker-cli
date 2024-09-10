@@ -23,7 +23,6 @@ if "%2" == "mark-in-progress" goto execute
 if "%2" == "mark-todo" goto execute
 if "%2" == "delete-task" goto execute
 if "%2" == "list" goto execute
-if "%2" == "description" goto execute
 if "%2" == "delete-all" goto execute
 if "%2" == "mark-all-done" goto execute
 if "%2" == "mark-all-todo" goto execute
@@ -33,7 +32,7 @@ if "%2" == "date-conclusion" goto execute
 if "%2" == "date-conclusion-all" goto execute
 
 REM If no valid command was found, display an error message and exit
-echo Invalid command. Use one of the following: add, update, mark-done, mark-in-progress, mark-todo, delete-task, list, description, delete-all, mark-all-done, mark-all-todo, mark-all-in-progress, type, data-conclusion.
+echo Invalid command. Use one of the following: add, update, mark-done, mark-in-progress, mark-todo, delete-task, list, delete-all, mark-all-done, mark-all-todo, mark-all-in-progress, type, data-conclusion.
 exit /b
 
 :execute
