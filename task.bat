@@ -1,27 +1,15 @@
 @echo off
+REM Check if the list exist
+node util/checkKeys.cjs %1
 
-REM Check if the first argument matches any of the valid categories
-if "%1" == "daily" (
-    goto checkCommand
-) else if "%1" == "study" (
-    goto checkCommand
-) else if "%1" == "entreteniment" (
-    goto checkCommand
-) else if "%1" == "revision" (
-    goto checkCommand
-) else if "%1" == "habitDaily" (
-    goto checkCommand
-) else if "%1" == "habitWeekly" (
-    goto checkCommand
-) else if "%1" == "configurate-task-field" (
-    goto checkCommand
-) else (
-    echo Invalid category. Please use: daily, study, entreteniment, or revision
-    echo habitDaily, habitWeekly.
+if errorlevel 1 (
+    echo Invalid list. Please use a valid list from tasks.json.
     exit /b
+) else (
+    goto checkCommands
 )
 
-:checkCommand
+:checkCommands
 REM Check if the second argument matches any of the valid commands
 if "%2" == "add" goto execute
 if "%2" == "update" goto execute
@@ -41,7 +29,7 @@ if "%2" == "add-field" goto execute
 if "%2" == "delete-field" goto execute
 
 REM If no valid command was found, display an error message and exit
-echo Invalid command. Use one of the following: add, update, mark-done, mark-in-progress, mark-todo, delete-task, list, delete-all, mark-all-done, mark-all-todo, mark-all-in-progress, type, data-conclusion.
+echo Invalid command.
 exit /b
 
 :execute

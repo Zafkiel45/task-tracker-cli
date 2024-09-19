@@ -2,6 +2,11 @@
 const { argv } = require("node:process");
 const fs = require("node:fs/promises");
 const path = require("path");
+
+module.exports = {
+  HandleReadTaskFile
+}
+
 // module imports
 const { GenericErrors } = require("./util/error");
 const { HandleCreateNewFieldToTasks } = require('./components/create-new-field.cjs');
@@ -383,7 +388,7 @@ async function HandleReadTaskFile() {
     } catch (readErr) {
       if (readErr.code === "ENOENT") {
         const tasksStructure = [
-          { daily: [], study: [], entertainment: [], revision: [], habitDaily: [], habitWeekly: []},
+          { daily: [], study: [], entertainment: [], revision: []},
         ];
         await fs.writeFile(
           "tasks.json",
@@ -438,6 +443,13 @@ function HandleStreakOfTasks(lastDate) {
   return lastDate !== HandleGetDate() ? true : false;
 }
 
+
+const errorLogs = [
+  'add','update', 'list', 'mark-all-done', 'mark-all-in-progress',
+  'mark-done', 'mark-in-progress', 'mark-todo', 'delete-task',
+  'mark-all-todo', 'delete-all', 'type', 'data-conclusion',
+]
+
 switch (commands[1]) {
     case "add":
       HandleAddTasks().then(() => HandleBeckup());
@@ -488,10 +500,14 @@ switch (commands[1]) {
       HandleDeleteField(HandleReadTaskFile, HandleWriteFile);
       break;
     default:
-      console.log("Invalid command. Use one of the following: add, update,");
-      console.log("mark-done, mark-in-progress, mark-todo, delete-task,");
-      console.log("list, mark-all-done, mark-all-in-progress");
-      console.log("mark-all-todo, delete-all, type, data-conclusion");
+      (() => {
+        if(!TASK_LIST) {
+          console.error("Invalid command. Use one of the following:");
+          errorLogs.forEach((item) => {
+            console.error(item);
+          })
+        }
+      })();
 }
 
 
