@@ -1,17 +1,19 @@
 #!/user/bin/env node
 const { argv } = require("node:process");
 const fs = require("node:fs/promises");
-const path = require("path")
-
+const path = require("path");
+// module imports
 const { GenericErrors } = require("./util/error");
-
+const { HandleCreateNewFieldToTasks } = require('./components/create-new-field.cjs');
+const { HandleDeleteField } = require('./components/delete-field.cjs');
+// minor utils
 const commands = argv.slice(2);
 const TASK_LIST = commands[0];
-
+// paths 
 const originalFilePath = path.join(__dirname, 'tasks.json');
 const backupFolderPath = path.join(__dirname, 'backup');
 const backupFilePath  = path.join(backupFolderPath, 'backup.json');
-
+// retry again after an error
 const MAX_RETRIES = 5; 
 const TIME_TO_RETRIES = 2000;
 
@@ -44,7 +46,6 @@ async function HandleCopyFile(src,dist, retries = 0) {
     }
   };
 };
-
 async function HandleBeckup() {
   try {
     await HandleDirectoryIfDidNotExist();
@@ -53,7 +54,6 @@ async function HandleBeckup() {
     console.error(err.message.trim());
   };
 };
-
 async function HandleUpdateTasks() {
   try {
     const JSON_BUFFER = await HandleReadTaskFile();
@@ -437,14 +437,13 @@ function HandleFindElement() {
 function HandleStreakOfTasks(lastDate) {
   return lastDate !== HandleGetDate() ? true : false;
 }
-if (commands[0]) {
-  switch (commands[1]) {
+
+switch (commands[1]) {
     case "add":
       HandleAddTasks().then(() => HandleBeckup());
       break;
     case "delete-task":
       HandleDeleteTask().then(() => HandleBeckup());
-      ;
       break;
     case "update":
       HandleUpdateTasks().then(() => HandleBeckup())
@@ -482,14 +481,17 @@ if (commands[0]) {
     case "date-conclusion-all":
       HandleSetDateConclusionToAllTasks().then(() => HandleBeckup())
       break;
+    case "add-field":
+      HandleCreateNewFieldToTasks(HandleReadTaskFile, HandleWriteFile);
+      break;
+    case "delete-field":
+      HandleDeleteField(HandleReadTaskFile, HandleWriteFile);
+      break;
     default:
       console.log("Invalid command. Use one of the following: add, update,");
       console.log("mark-done, mark-in-progress, mark-todo, delete-task,");
       console.log("list, mark-all-done, mark-all-in-progress");
       console.log("mark-all-todo, delete-all, type, data-conclusion");
-  }
-} else {
-  console.error(
-    'please, specific list with the first command: "daily", "study", "entertainment", "revision"'
-  );
 }
+
+
