@@ -11,6 +11,7 @@ const { GenericErrors } = require("./util/error");
 const { HandleCreateNewFieldToTasks } = require('./components/create-new-field.cjs');
 const { HandleDeleteField } = require('./components/delete-field.cjs');
 const { HandleSetTypeAllTasks } = require('./components/type-all-tasks.cjs');
+const { HandleHelp } = require('./components/help-user.cjs');
 // minor utils
 const commands = argv.slice(2);
 const TASK_LIST = commands[0];
@@ -459,7 +460,8 @@ function HandleStreakOfTasks(lastDate) {
 const errorLogs = [
   'add','update', 'list', 'mark-all-done', 'mark-all-in-progress',
   'mark-done', 'mark-in-progress', 'mark-todo', 'delete-task',
-  'mark-all-todo', 'delete-all', 'type', 'data-conclusion',
+  'mark-all-todo', 'delete-all', 'type', 'data-conclusion', 'type-all', 
+  'data-conclusion-all', 'configuration-task-field',
 ]
 
 switch (commands[1]) {
@@ -514,9 +516,13 @@ switch (commands[1]) {
     case "type-all":
       HandleSetTypeAllTasks(HandleReadTaskFile, HandleWriteFile);
       break;
+    case "all":
+        HandleHelp();
+      break;
     default:
       (() => {
         if(!TASK_LIST) {
+          console.log(`Por favor, para saber mais sobre todos os comandos, utilize: "help all"`)
           console.error("Invalid command. Use one of the following:");
           errorLogs.forEach((item) => {
             console.error(item);
