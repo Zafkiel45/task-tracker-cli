@@ -1,5 +1,6 @@
 async function HandleCatchingTheUserInput() {
-    console.log('type "exit" in the terminal to finish this event');
+    console.warn(`❗ Digite "exit" para encerrar encerrar o processo`);
+    console.log(`🔷 Para criar listas apenas digite um nome de alguma lista que ainda não existe sem espaço entre as palavras.`.trim());
 
     return new Promise((resolve, rejects) => {
         process.stdin.on('data', (input) => {
@@ -7,16 +8,16 @@ async function HandleCatchingTheUserInput() {
             const formattedInput = String(input).trim();
 
             if(/\s/.test(formattedInput)) {
-                console.log('the word typed has whitespace!');
-                console.log('Please, it use CamelCase');
+                console.log('O nome do campo não pode ter espaços!');
+                console.log('Por favor, use o formato CamelCase');
 
-                rejects('a error occurred with the format of input');
+                rejects('[TIPO DE ERRO]: Sintax');
                 process.exit(1);
 
             } else if(formattedInput === 'exit') {
                 console.log('exiting...');
 
-                rejects('Exited successufully!');
+                rejects('Processo encerrado com sucesso!');
                 process.exit(0);
     
             } else {
@@ -25,7 +26,6 @@ async function HandleCatchingTheUserInput() {
         }); 
     })
 };
-
 async function HandleCreateNewFieldToTasks(JSON_TASK, HandleWriteFile) {
     const taskObject = await JSON_TASK();
     const userInput = await HandleCatchingTheUserInput();
@@ -37,10 +37,10 @@ async function HandleCreateNewFieldToTasks(JSON_TASK, HandleWriteFile) {
 
         taskObject[0][userInput] = [];
         await HandleWriteFile.call(taskObject);
-
+        console.log(`A lista ${userInput} foi criada com sucesso!`);
         process.exit(0);
     } else {
-        console.error('this field alright exist!');
+        console.error('Este campo já existe! Encerrando o processo.');
         process.exit(1);
     };
 };

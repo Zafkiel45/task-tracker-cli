@@ -6,7 +6,6 @@ const path = require("path");
 module.exports = {
   HandleReadTaskFile
 }
-
 // module imports
 const { GenericErrors } = require("./util/error");
 const { HandleCreateNewFieldToTasks } = require('./components/create-new-field.cjs');
@@ -66,7 +65,7 @@ async function HandleUpdateTasks() {
     if (commands[2] && !isNaN(commands[2]) && commands[3]) {
       HandleUpdateElementAttribute.call(
         JSON_BUFFER[0][TASK_LIST],
-        commands[3],
+        commands[3].toLocaleLowerCase(),
         "name"
       );
       await HandleWriteFile.call(JSON_BUFFER);
@@ -110,7 +109,7 @@ async function HandleAddTasks() {
 
     if (commands[2]) {
       JSON_BUFFER[0][TASK_LIST].push({
-        name: String(commands[2]),
+        name: String(commands[2]).toLowerCase(),
         id: HandleGenerateTasksId(JSON_BUFFER[0][TASK_LIST]),
         status: "todo",
         createdAt: HandleGetDate(),
@@ -363,13 +362,24 @@ async function HandleSetDateConclusion() {
 async function HandleSetDateConclusionToAllTasks() {
   try {
     const JSON_BUFFER = await HandleReadTaskFile();
+    const dateFormater = /^(0[1-9]|1[0-2])\/(0[1-9]|[12]\d|3[01])\/(\d{4})$/;
 
-    for (element of JSON_BUFFER[0][TASK_LIST]) {
-      element.finishAt = commands[2];
+    if(dateFormater.test(commands[2])) {
+
+      for (element of JSON_BUFFER[0][TASK_LIST]) {
+        element.finishAt = commands[2];
+      }
+  
+      await HandleWriteFile.call(JSON_BUFFER);
+      console.log(`All tasks of ${TASK_LIST} scheduled to ${commands[2]}`);
+    } else {
+      throw new GenericErrors(`
+        ❗ Please, use the follow format: mm/dd/yyyy
+        `,
+        `[ERROR TYPE]: Syntax`
+      )
     }
 
-    await HandleWriteFile.call(JSON_BUFFER);
-    console.log(`All tasks of ${TASK_LIST} scheduled to ${commands[2]}`);
   } catch (err) {
     console.error(err.message.trim(), err.type);
     process.exit(1);
@@ -411,8 +421,9 @@ function HandleGetDate() {
   const currentMonth = dateObject.getMonth() + 1;
   const currentYear = dateObject.getFullYear();
 
-  return `${currentData}/${currentMonth}/${currentYear}`;
+  return `${currentMonth}/${currentData}/${currentYear}`;
 };
+
 function HandleUpdateElementAttribute(attr, property) {
   for (element of this) {
     if (element.id === Number(commands[2])) {
