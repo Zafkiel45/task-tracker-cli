@@ -10,6 +10,7 @@ module.exports = {
 const { GenericErrors } = require("./util/error");
 const { HandleCreateNewFieldToTasks } = require('./components/create-new-field.cjs');
 const { HandleDeleteField } = require('./components/delete-field.cjs');
+const { HandleSetTypeAllTasks } = require('./components/type-all-tasks.cjs');
 // minor utils
 const commands = argv.slice(2);
 const TASK_LIST = commands[0];
@@ -510,6 +511,9 @@ switch (commands[1]) {
     case "delete-field":
       HandleDeleteField(HandleReadTaskFile, HandleWriteFile);
       break;
+    case "type-all":
+      HandleSetTypeAllTasks(HandleReadTaskFile, HandleWriteFile);
+      break;
     default:
       (() => {
         if(!TASK_LIST) {
@@ -520,5 +524,3 @@ switch (commands[1]) {
         }
       })();
 }
-
-
