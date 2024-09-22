@@ -466,46 +466,46 @@ const errorLogs = [
 
 switch (commands[1]) {
     case "add":
-      HandleAddTasks().then(() => HandleBeckup());
+      HandleAddTasks()
       break;
     case "delete-task":
-      HandleDeleteTask().then(() => HandleBeckup());
+      HandleDeleteTask()
       break;
     case "update":
-      HandleUpdateTasks().then(() => HandleBeckup())
+      HandleUpdateTasks()
       break;
     case "list":
       HandleListTasks()
       break;
     case "mark-todo":
-      HandleSetTaskStatus("todo").then(() => HandleBeckup())
+      HandleSetTaskStatus("todo")
       break;
     case "mark-done":
-      HandleSetTaskStatus("done").then(() => HandleBeckup())
+      HandleSetTaskStatus("done")
       break;
     case "mark-in-progress":
-      HandleSetTaskStatus("in-progress").then(() => HandleBeckup())
+      HandleSetTaskStatus("in-progress")
       break;
     case "delete-all":
-      HandleDeleteAllTasks().then(() => HandleBeckup())
+      HandleDeleteAllTasks()
       break;
     case "mark-all-done":
-      HandleMarkAllTasks("done").then(() => HandleBeckup())
+      HandleMarkAllTasks("done")
       break;
     case "mark-all-todo":
-      HandleMarkAllTasks("todo").then(() => HandleBeckup())
+      HandleMarkAllTasks("todo")
       break;
     case "mark-all-in-progress":
-      HandleMarkAllTasks("in-progress").then(() => HandleBeckup())
+      HandleMarkAllTasks("in-progress")
       break;
     case "type":
-      HandleSetTypeOfTask().then(() => HandleBeckup())
+      HandleSetTypeOfTask()
       break;
     case "date-conclusion":
-      HandleSetDateConclusion().then(() => HandleBeckup())
+      HandleSetDateConclusion()
       break;
     case "date-conclusion-all":
-      HandleSetDateConclusionToAllTasks().then(() => HandleBeckup())
+      HandleSetDateConclusionToAllTasks()
       break;
     case "add-field":
       HandleCreateNewFieldToTasks(HandleReadTaskFile, HandleWriteFile);
@@ -518,6 +518,9 @@ switch (commands[1]) {
       break;
     case "all":
         HandleHelp();
+      break;
+    case "run":
+        HandleBeckup()
       break;
     default:
       (() => {

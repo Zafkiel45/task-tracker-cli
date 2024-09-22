@@ -29,6 +29,7 @@ if "%2" == "add-field" goto execute
 if "%2" == "delete-field" goto execute
 if "%2" == "type-all" goto execute
 if "%2" == "all" goto execute
+if "%2" == "run" goto execute
 
 REM If no valid command was found, display an error message and exit
 echo Invalid command.

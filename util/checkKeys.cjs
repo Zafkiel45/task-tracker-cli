@@ -3,7 +3,12 @@ const { HandleReadTaskFile } = require('../program.cjs');
 
 async function HandleReadFile() {
     try {
-        if(argv[2] !== 'configuration-task-field' && argv[2] !== 'help') {
+
+        const isTaskField = argv[2] !== 'configuration-task-field';
+        const isHelp = argv[2] !== 'help';
+        const isBackup = argv[2] !== 'backup';
+
+        if(isTaskField && isHelp && isBackup) {
             const task = await HandleReadTaskFile();
             const key = Object.keys(task[0]);
     
