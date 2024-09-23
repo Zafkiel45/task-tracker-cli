@@ -1,6 +1,7 @@
 async function HandleCatchingTheUserInput() {
-    console.warn(`❗ Digite "exit" para encerrar encerrar o processo`);
+    console.warn(`💡 Digite "exit" para encerrar encerrar o processo`);
     console.log(`🔷 Para criar listas apenas digite um nome de alguma lista que ainda não existe sem espaço entre as palavras.`.trim());
+    console.log(`🔷 para deletar listas, basta digitar o nome de alguma lista existente e apertar "Enter".`.trim());
 
     return new Promise((resolve, rejects) => {
         process.stdin.on('data', (input) => {
@@ -17,7 +18,7 @@ async function HandleCatchingTheUserInput() {
             } else if(formattedInput === 'exit') {
                 console.log('exiting...');
 
-                rejects('Processo encerrado com sucesso!');
+                rejects('🔷 Processo encerrado com sucesso!');
                 process.exit(0);
     
             } else {

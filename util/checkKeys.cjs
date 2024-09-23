@@ -22,7 +22,7 @@ async function HandleReadFile() {
                     Por favor, crie a lista antes para poder acessa-la. 
                     Caso tenha alguma dúvida, digite o comando "help" no 
                     terminal.
-                `);
+                `.trim());
             };
         } 
 

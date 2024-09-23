@@ -4,62 +4,67 @@ const fs = require("node:fs/promises");
 const path = require("path");
 
 module.exports = {
-  HandleReadTaskFile
-}
+  HandleReadTaskFile,
+};
 // module imports
-const { GenericErrors } = require("./util/error");
-const { HandleCreateNewFieldToTasks } = require('./components/create-new-field.cjs');
-const { HandleDeleteField } = require('./components/delete-field.cjs');
-const { HandleSetTypeAllTasks } = require('./components/type-all-tasks.cjs');
-const { HandleHelp } = require('./components/help-user.cjs');
+const { GenericErrors } = require("./util/error.cjs");
+const {
+  HandleCreateNewFieldToTasks,
+} = require("./components/create-new-field.cjs");
+const { HandleDeleteField } = require("./components/delete-field.cjs");
+const { HandleSetTypeAllTasks } = require("./components/type-all-tasks.cjs");
+const { HandleHelp } = require("./components/help-user.cjs");
 // minor utils
 const commands = argv.slice(2);
 const TASK_LIST = commands[0];
-// paths 
-const originalFilePath = path.join(__dirname, 'tasks.json');
-const backupFolderPath = path.join(__dirname, 'backup');
-const backupFilePath  = path.join(backupFolderPath, 'backup.json');
+// paths
+const originalFilePath = path.join(__dirname, "tasks.json");
+const backupFolderPath = path.join(__dirname, "backup");
+const backupFilePath = path.join(backupFolderPath, "backup.json");
 // retry again after an error
-const MAX_RETRIES = 5; 
+const MAX_RETRIES = 5;
 const TIME_TO_RETRIES = 2000;
 
 async function HandleDirectoryIfDidNotExist() {
   try {
     await fs.access(backupFolderPath);
-  } catch(err) {
-    if(err.code === "ENOENT") {
+  } catch (err) {
+    if (err.code === "ENOENT") {
       await fs.mkdir(backupFolderPath);
-      console.log(`Backup folder created with successfully!`);
-      console.log(`Please, check manually the file necessary recovere tasks!`);
-    };
-  };
-};
-async function HandleCopyFile(src,dist, retries = 0) {
-  try{
-    await fs.copyFile(src,dist);
-    console.log(`✅ Backup updated successfully`);
-  } catch(err) {
-    console.log(`EI, ESTOU SEN CHAMADO`)
-    if(err.code === 'EBUSY' && retries < MAX_RETRIES) {
-      console.warn(
-        `Occurs an error during the Backup, attempt again in ${TIME_TO_RETRIES} 
-        seconds`.trim()
+      console.log(`✅ Diretório de backup criado com sucesso!`);
+      console.log(
+        `🔷 Se necessário, cheque manualmente o arquivo de backup manualmente`
       );
-      await new Promise(resolve => setTimeout(resolve, TIME_TO_RETRIES));
+    }
+  }
+}
+async function HandleCopyFile(src, dist, retries = 0) {
+  try {
+    await fs.copyFile(src, dist);
+    console.log(`✅ Backup atualizado com sucesso!`);
+  } catch (err) {
+    if (err.code === "EBUSY" && retries < MAX_RETRIES) {
+      console.warn(
+        `Um erro ocorreu durante o processo de backup, tentando
+          novamente em ${TIME_TO_RETRIES} segundos
+        `.trim()
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, TIME_TO_RETRIES));
       return HandleCopyFile(src, dist, retries + 1);
     } else {
-      console.error(`❌ Occurred a error during the backup`, err);
+      console.error(`❌ Não foi possível realizar o backup`, err);
     }
-  };
-};
+  }
+}
 async function HandleBeckup() {
   try {
     await HandleDirectoryIfDidNotExist();
     await HandleCopyFile(originalFilePath, backupFilePath);
-  } catch(err) {
+  } catch (err) {
     console.error(err.message.trim());
-  };
-};
+  }
+}
 async function HandleUpdateTasks() {
   try {
     const JSON_BUFFER = await HandleReadTaskFile();
@@ -74,30 +79,32 @@ async function HandleUpdateTasks() {
 
       const elementFindOut = HandleFindElement.call(JSON_BUFFER[0][TASK_LIST]);
 
-      console.log(`The task with id ${commands[2]} was successfully updated`);
-      console.log(`The name of task is: ${elementFindOut.name}`);
+      console.log(
+        `🔷 A tarefa com ID ${commands[2]} Foi atualizada com sucesso`.trim()
+      );
+      console.log(
+        `🔷 O nome da tarefa atualiza agora é: ${elementFindOut.name}`.trim()
+      );
     } else {
-      // possible commons errors
       if (!commands[1]) {
         throw new GenericErrors(
-          `[Error]: The "id" of task does not specified;`,
-          `[Type of Error]: syntax`
+          `[ERRO]: O ID da tarefa não foi especificado`,
+          `[TIPO DE ERRO]: Sintax`
         );
       } else if (!commands[2]) {
         throw new GenericErrors(
-          `[Error]: Name of the tasks wasn't specified;`,
-          `[Type of Error]: syntax`
+          `[ERRO]: Name da terefa não foi específicado`,
+          `[TIPO DE ERRO]: Sintax`
         );
       } else if (isNaN(commands[1])) {
         throw new GenericErrors(
-          `[Error]: Please, the ID shall be a number;`,
-          `[Type of Error]: syntax`
+          `[ERRO]: O ID da tarefa precisa ser um número`,
+          `[TIPO DE ERRO]: Sintax`
         );
       }
-      // catch all adjacent errors
       throw new GenericErrors(
-        `[Error]: Please, try again;`,
-        `[Type of Error]: unknown`
+        `[ERRO]: Por favor, tente novamente`,
+        `[TIPO DE ERRO]: Desconhecido`
       );
     }
   } catch (err) {
@@ -124,14 +131,14 @@ async function HandleAddTasks() {
 
       await HandleWriteFile.call(JSON_BUFFER);
       console.info(
-        "task successfully added with ID:",
+        "🔷 tarefa com o seguinte ID foi criada:",
         HandleGenerateTasksId(JSON_BUFFER[0][TASK_LIST]) - 1
       );
     } else {
       if (!commands[2]) {
         throw new GenericErrors(
-          `[Error]: Name of the task is empty! Please, add some name to it.`,
-          "[Type of Error]: Syntax"
+          `❗ [ERRO]: O nome da tarefa está vazia, por favor, dê um nome a ela!`,
+          "❗ [TIPO DE ERRO]: Sintax"
         );
       }
     }
@@ -150,10 +157,12 @@ async function HandleDeleteTask() {
       });
 
       if (tasksFiltred.length === JSON_BUFFER[0][TASK_LIST].length) {
-        console.log("the task do not exist");
+        console.log("❗ A tefefa não existe");
       } else {
-        console.warn(`task with id: ${commands[2]} successfully deleted`);
-        console.warn(`The task was of: ${commands[0]}`);
+        console.warn(
+          `✅ A terefa com o ID: ${commands[2]} foi deleta com sucesso!`
+        );
+        console.warn(`🔷 A terefa era da seguinte lista: ${commands[0]}`);
       }
 
       JSON_BUFFER[0][TASK_LIST] = tasksFiltred;
@@ -172,21 +181,21 @@ async function HandleDeleteTask() {
 async function HandleListTasks() {
   try {
     function HandleEmptyArray(arr) {
-      return arr.length === 0 ? "without tasks" : arr;
+      return arr.length === 0 ? "Sem tarefas!" : arr;
     }
 
     const jsonBuffer = await HandleReadTaskFile();
 
     switch (commands[2]) {
       case undefined:
-        const allTasks = jsonBuffer[0][TASK_LIST]
+        const allTasks = jsonBuffer[0][TASK_LIST];
         console.table(allTasks);
         break;
       case "todo":
         const todoArrayFiltred = jsonBuffer[0][TASK_LIST].filter(
           (item) => item.status === "todo"
         );
-        const todoArray = todoArrayFiltred
+        const todoArray = todoArrayFiltred;
         console.table(HandleEmptyArray(todoArray));
         break;
       case "done":
@@ -205,8 +214,12 @@ async function HandleListTasks() {
         break;
       default:
         throw new GenericErrors(
-          `Unknow "${commands[2]}". Please, use: 'done', 'in-progress' or 'todo'`,
-          "[Type of Error]: Syntax"
+          `
+            ❗ Status desconhecido: "${commands[2]}". 
+            Por favor, use: 'done', 'in-progress' ou 'todo'
+          `.trim(),
+
+          "❗ [TIPO DE ERRO]: Sintax"
         );
     }
   } catch (err) {
@@ -227,22 +240,22 @@ async function HandleSetTaskStatus(sts) {
       const elementFindOut = HandleFindElement.call(JSON_BUFFER[0][TASK_LIST]);
 
       console.log(
-        `The task of '${commands[0]}' with the ID ${commands[2]} successfully updated'`
+        `✅ A terefa da lista '${commands[0]}' com ID ${commands[2]} Foi atualizada com sucesso`.trim()
       );
-      console.log(`Name of task updated: ${elementFindOut.name}`);
+      console.log(`🔷 Nome da tarefa atualizada: ${elementFindOut.name}`);
       // update de json file
       await HandleWriteFile.call(JSON_BUFFER);
     } else {
       throw new GenericErrors(
-        `Empty 'id'. Please, specific the task 'id'`,
-        "[Type of Error]: Syntax"
+        `❗ Specifique o ID da tarefa'`,
+        "❗ [TIPO DE ERRO]: Sintax"
       );
     }
   } catch (err) {
     console.error(err.message, err.type);
     process.exit(1);
   }
-};
+}
 async function HandleDeleteAllTasks() {
   try {
     const JSON_BUFFER = await HandleReadTaskFile();
@@ -250,9 +263,14 @@ async function HandleDeleteAllTasks() {
     JSON_BUFFER[0][TASK_LIST] = [];
 
     HandleWriteFile.call(JSON_BUFFER);
-    console.log(`All tasks of ${TASK_LIST} successfully deleted`);
+
+    console.log(
+      `
+      ✅ Todas as tarefas de ${TASK_LIST} foram deletadas com sucesso!
+    `.trim()
+    );
   } catch (err) {
-    console.error("occur a error:", err);
+    console.error("❗ Ocorreu um erro:", err);
     process.exit(1);
   }
 }
@@ -265,8 +283,9 @@ async function HandleMarkAllTasks(sts) {
     }
 
     HandleWriteFile.call(JSON_BUFFER);
+
     console.log(
-      `all tasks of ${TASK_LIST} marked as ${sts} successfully`
+      `✅ Todas as tarefas de: ${TASK_LIST} foram marcadas como ${sts} com sucesso`
     );
   } catch (err) {
     console.error("occur a error:", err.trim());
@@ -286,23 +305,25 @@ async function HandleSetTypeOfTask() {
       HandleWriteFile.call(JSON_BUFFER);
 
       const elementFindOut = HandleFindElement.call(JSON_BUFFER[0][TASK_LIST]);
-      console.log(`The task with ID ${commands[2]} was successfully updated`);
-      console.log(`THe name of task is: ${elementFindOut.name}`);
+      console.log(
+        `✅ A tarefa com o ID ${commands[2]} foi atualizada com sucesso!`
+      );
+      console.log(`🔷 O nome da tarefa é: ${elementFindOut.name}`);
     } else {
       if (!commands[2] || isNaN(commands[2])) {
         throw new GenericErrors(
-          `You have forgotten of pass the id of the task!`,
-          `[Type of Error]: Syntax; Command Used: "Type"`,
+          `❗ Você esqueceu de passar o ID da tarefa!`,
+          `❗ [TIPO DE ERRO]: Sintax`
         );
       } else if (!commands[3]) {
         throw new GenericErrors(
-          `You have forgotten of pass the name of the type!`,
-          `[Type of Error]: Syntax; Command Used: "Type"`
+          `❗ Você esqueceu de passar o nome do tipo!`,
+          `❗ [TIPO DE ERRO]: Sintax`
         );
       } else {
         throw new GenericErrors(
-          `thing it is wrong`,
-          `[Type of Error]: Unknown; Command Used: "Type"`
+          `❗ Ops... Algo deu errado`,
+          `❗ [TIPO DE ERRO]: Desconhecido`
         );
       }
     }
@@ -321,9 +342,8 @@ async function HandleSetDateConclusion() {
 
       if (!dateTest) {
         throw new GenericErrors(
-          `
-          The date formater is wrong. Please, use the follow format: [MM][DD][YYYY]`,
-          `[Error Type]: Syntax`
+          `❗ A formatação está errada, por favor, utilize o seguinte formato: [MM][DD][YYYY]`,
+          `❗ [TIPO DE ERRO]: Sintax`
         );
       }
 
@@ -336,23 +356,25 @@ async function HandleSetDateConclusion() {
 
       const elementFindOut = HandleFindElement.call(JSON_BUFFER[0][TASK_LIST]);
 
-      console.log(`the task wit id ${commands[2]} was successfully updated`);
-      console.log(`the task name is: ${elementFindOut.name}`);
+      console.log(
+        `🔷 A tarefa com ID ${commands[2]} foi atualizada com sucesso!`
+      );
+      console.log(`🔷 O nome da tarefa é: ${elementFindOut.name}`);
     } else {
       if (!commands[2] || isNaN(commands[2])) {
         throw new GenericErrors(
-          "You have forgotten of pass the ID of the task",
-          "[Type of Error]: Syntax"
+          "❗ Você esqueceu de passar o ID da tarefa",
+          "❗ [TIPO DE ERRO]: Sintax"
         );
       } else if (!commands[3]) {
         throw new GenericErrors(
-          "You have forgotten of pass the data of conclusion to task",
-          "[Type of Error]: Syntax"
+          "❗ Você esqueceu de passar a data de conclusão",
+          "❗ [TIPO DE ERRO]: Sintax"
         );
       } else {
         throw new GenericErrors(
-          "Ops...Any it is wrong",
-          "[Type of Error]: Syntax"
+          "❗ Ops...Algo deu errado!",
+          "❗ [TIPO DE ERRO]: Sintax"
         );
       }
     }
@@ -366,22 +388,22 @@ async function HandleSetDateConclusionToAllTasks() {
     const JSON_BUFFER = await HandleReadTaskFile();
     const dateFormater = /^(0[1-9]|1[0-2])\/(0[1-9]|[12]\d|3[01])\/(\d{4})$/;
 
-    if(dateFormater.test(commands[2])) {
-
+    if (dateFormater.test(commands[2])) {
       for (element of JSON_BUFFER[0][TASK_LIST]) {
         element.finishAt = commands[2];
       }
-  
-      await HandleWriteFile.call(JSON_BUFFER);
-      console.log(`All tasks of ${TASK_LIST} scheduled to ${commands[2]}`);
-    } else {
-      throw new GenericErrors(`
-        ❗ Please, use the follow format: mm/dd/yyyy
-        `,
-        `[ERROR TYPE]: Syntax`
-      )
-    }
 
+      await HandleWriteFile.call(JSON_BUFFER);
+      console.log(
+        `🔷 Todas as tarefas de ${TASK_LIST} foram agendadas para ${commands[2]}`
+      );
+    } else {
+      throw new GenericErrors(
+        `
+        ❗ Por favor, utilize o seguinte formato: [MM]/[DD]/[YYYY]`,
+        `[TIPO DE ERRO]: Sintax`
+      );
+    }
   } catch (err) {
     console.error(err.message.trim(), err.type);
     process.exit(1);
@@ -400,7 +422,7 @@ async function HandleReadTaskFile() {
     } catch (readErr) {
       if (readErr.code === "ENOENT") {
         const tasksStructure = [
-          { daily: [], study: [], entertainment: [], revision: []},
+          { daily: [], study: [], entertainment: [], revision: [] },
         ];
         await fs.writeFile(
           "tasks.json",
@@ -412,7 +434,7 @@ async function HandleReadTaskFile() {
       }
     }
   } catch (err) {
-    console.error("Error reading file:", err);
+    console.error("❗ Erro ao ler o arquivo:", err);
     process.exit(1);
   }
 }
@@ -424,8 +446,7 @@ function HandleGetDate() {
   const currentYear = dateObject.getFullYear();
 
   return `${currentMonth}/${currentData}/${currentYear}`;
-};
-
+}
 function HandleUpdateElementAttribute(attr, property) {
   for (element of this) {
     if (element.id === Number(commands[2])) {
@@ -456,80 +477,93 @@ function HandleStreakOfTasks(lastDate) {
   return lastDate !== HandleGetDate() ? true : false;
 }
 
-
 const errorLogs = [
-  'add','update', 'list', 'mark-all-done', 'mark-all-in-progress',
-  'mark-done', 'mark-in-progress', 'mark-todo', 'delete-task',
-  'mark-all-todo', 'delete-all', 'type', 'data-conclusion', 'type-all', 
-  'data-conclusion-all', 'configuration-task-field',
-]
+  "add",
+  "update",
+  "list",
+  "mark-all-done",
+  "mark-all-in-progress",
+  "mark-done",
+  "mark-in-progress",
+  "mark-todo",
+  "delete-task",
+  "mark-all-todo",
+  "delete-all",
+  "type",
+  "data-conclusion",
+  "type-all",
+  "data-conclusion-all",
+  "configuration-task-field",
+];
 
 switch (commands[1]) {
-    case "add":
-      HandleAddTasks()
-      break;
-    case "delete-task":
-      HandleDeleteTask()
-      break;
-    case "update":
-      HandleUpdateTasks()
-      break;
-    case "list":
-      HandleListTasks()
-      break;
-    case "mark-todo":
-      HandleSetTaskStatus("todo")
-      break;
-    case "mark-done":
-      HandleSetTaskStatus("done")
-      break;
-    case "mark-in-progress":
-      HandleSetTaskStatus("in-progress")
-      break;
-    case "delete-all":
-      HandleDeleteAllTasks()
-      break;
-    case "mark-all-done":
-      HandleMarkAllTasks("done")
-      break;
-    case "mark-all-todo":
-      HandleMarkAllTasks("todo")
-      break;
-    case "mark-all-in-progress":
-      HandleMarkAllTasks("in-progress")
-      break;
-    case "type":
-      HandleSetTypeOfTask()
-      break;
-    case "date-conclusion":
-      HandleSetDateConclusion()
-      break;
-    case "date-conclusion-all":
-      HandleSetDateConclusionToAllTasks()
-      break;
-    case "add-field":
-      HandleCreateNewFieldToTasks(HandleReadTaskFile, HandleWriteFile);
-      break;
-    case "delete-field":
-      HandleDeleteField(HandleReadTaskFile, HandleWriteFile);
-      break;
-    case "type-all":
-      HandleSetTypeAllTasks(HandleReadTaskFile, HandleWriteFile);
-      break;
-    case "all":
-        HandleHelp();
-      break;
-    case "run":
-        HandleBeckup()
-      break;
-    default:
-      (() => {
-        if(!TASK_LIST) {
-          console.log(`Por favor, para saber mais sobre todos os comandos, utilize: "help all"`)
-          console.error("Invalid command. Use one of the following:");
-          errorLogs.forEach((item) => {
-            console.error(item);
-          })
-        }
-      })();
+  case "add":
+    HandleAddTasks();
+    break;
+  case "delete-task":
+    HandleDeleteTask();
+    break;
+  case "update":
+    HandleUpdateTasks();
+    break;
+  case "list":
+    HandleListTasks();
+    break;
+  case "mark-todo":
+    HandleSetTaskStatus("todo");
+    break;
+  case "mark-done":
+    HandleSetTaskStatus("done");
+    break;
+  case "mark-in-progress":
+    HandleSetTaskStatus("in-progress");
+    break;
+  case "delete-all":
+    HandleDeleteAllTasks();
+    break;
+  case "mark-all-done":
+    HandleMarkAllTasks("done");
+    break;
+  case "mark-all-todo":
+    HandleMarkAllTasks("todo");
+    break;
+  case "mark-all-in-progress":
+    HandleMarkAllTasks("in-progress");
+    break;
+  case "type":
+    HandleSetTypeOfTask();
+    break;
+  case "date-conclusion":
+    HandleSetDateConclusion();
+    break;
+  case "date-conclusion-all":
+    HandleSetDateConclusionToAllTasks();
+    break;
+  case "add-field":
+    HandleCreateNewFieldToTasks(HandleReadTaskFile, HandleWriteFile);
+    break;
+  case "delete-field":
+    HandleDeleteField(HandleReadTaskFile, HandleWriteFile);
+    break;
+  case "type-all":
+    HandleSetTypeAllTasks(HandleReadTaskFile, HandleWriteFile);
+    break;
+  case "all":
+    HandleHelp();
+    break;
+  case "run":
+    HandleBeckup();
+    break;
+  default:
+    (() => {
+      if (!TASK_LIST) {
+        console.log(
+          `🔷 Por favor, para saber mais sobre todos os comandos, utilize: "help all"`
+        );
+        console.error("❗ Comando inválido! Utilize um dos seguintes:");
+        errorLogs.forEach((item) => {
+          console.error(item);
+        });
+      }
+    })();
 }

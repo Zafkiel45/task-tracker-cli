@@ -16,6 +16,7 @@ const commands = {
     "add-field": "Usado para adicionar um novo campo",
     "delete-field": "Usado para remover um campo",
     "type-all": "Usado para definir um tipo para todas as tarefas da lista",
+    "configuration-task-field": "Usado para alterar a estrutura geral da aplicação, adicionando ou apagando listas",
 };
 
 function HandleHelp() {

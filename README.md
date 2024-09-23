@@ -172,7 +172,7 @@ node program.cjs study data-conclusion 2 "02/12/2024"
 ```
 Altera a data de conlusão da tarefa de `study` com o `id=2` para `02/12/2024`- dia 12 de fevereiro de 2024
 
-# configurate-task-field: 
+# configuration-task-field: 
 
 Este comando é um comando especial pois tem uma estrutura um tanto diferente dos outros comandos. Este comando tem como principal utilidade alterar a estrutura de suas tarefas, adicionando mais listas ou removendo. Considere os seguintes exemplos: 
 
