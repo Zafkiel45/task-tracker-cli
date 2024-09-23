@@ -14,6 +14,7 @@ const {
 const { HandleDeleteField } = require("./components/delete-field.cjs");
 const { HandleSetTypeAllTasks } = require("./components/type-all-tasks.cjs");
 const { HandleHelp } = require("./components/help-user.cjs");
+const { HandleSearchNotifications } = require('./components/notification.cjs')
 // minor utils
 const commands = argv.slice(2);
 const TASK_LIST = commands[0];
@@ -422,7 +423,7 @@ async function HandleReadTaskFile() {
     } catch (readErr) {
       if (readErr.code === "ENOENT") {
         const tasksStructure = [
-          { daily: [], study: [], entertainment: [], revision: [] },
+          { daily: [], study: [], entertainment: [], revision: [] }, []
         ];
         await fs.writeFile(
           "tasks.json",
@@ -441,8 +442,10 @@ async function HandleReadTaskFile() {
 function HandleGetDate() {
   const dateObject = new Date();
 
-  const currentData = dateObject.getDate();
-  const currentMonth = dateObject.getMonth() + 1;
+  const pad = (number) => (number < 10 ? '0' + number : number);
+
+  const currentData = pad(dateObject.getDate());
+  const currentMonth = pad(dateObject.getMonth() + 1);
   const currentYear = dateObject.getFullYear();
 
   return `${currentMonth}/${currentData}/${currentYear}`;
@@ -553,6 +556,9 @@ switch (commands[1]) {
     break;
   case "run":
     HandleBeckup();
+    break;
+  case "show":
+    HandleSearchNotifications(HandleReadTaskFile, HandleWriteFile, HandleGetDate);
     break;
   default:
     (() => {

@@ -11,6 +11,7 @@ async function HandleSetTypeAllTasks(LIST, HandleWrite) {
         await HandleWrite.call(listofTask);
     } catch (err) {
         console.error(`❗ O seguinte erro ocorreu:`, err);
+        process.exit(1);
     }
 }   
 
