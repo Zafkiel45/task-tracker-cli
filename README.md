@@ -211,6 +211,31 @@ Listará todos os comandos existentes no programa atualmente, com breve descriç
 ```cmd 
 node program.cjs help all
 ```
+# backup 
+
+Nas versões mais recentes > v1.2 o backup não é mais realizado automaticamente devido a erros. Antigamente, se você apagasse sem querer uma lista, automaticamente um backup da lista apagada seria feito, perdendo seu significado. 
+
+Agora há um comando manual exclusivo para ele, que, uma vez executado, irá fazer uma cópia de seu `tasks.json` para a pasta `backup` dentro do mesmo diretório, com o nome de `backup.json`.
+
+É importante resaltar que, se por ventura você apagar o `tasks.json` e quiser recupera-la ao susbtitituir os arquivos perdidos pelo backup, é necessário que você mova o arquivo de `backup.json` para o mesmo diretório de `program.cjs` e susbtitua o nome para `tasks.json`.
+
+```cmd 
+node program.cjs backup run
+```
+irá realizar o backup.
+
+# notifação 
+
+As notificação chegam nas versões > v1.2 e tem como intuito facilitar a procura pela as tarefas que precisa realizar hoje. 
+
+Uma vez que você digite o comando abaixo, será filtrado todas as tarefas que tem `finishAt` marcado para a data atual e armazenado dentro de um `array` separado. 
+
+Consule `data-conclusion comando` aqui na documentação para ter um maior entendimento.
+
+```cmd 
+node program.cjs notification show
+```
+
 # bath file:
 
 Com o `.bath` file, você consegue encurtar a forma que o **script** é chamado, assim aprimorando a experiência. Se você optar por adicionr o `task.bat` a suas variavéis de ambiente em seu sistema operacional, ao invés de invoca-lo como: `node program.cjs [comandos]`, será como da forma abaixo. 
