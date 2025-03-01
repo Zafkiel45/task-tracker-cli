@@ -15,57 +15,15 @@ const { HandleDeleteField } = require("./components/delete-field.cjs");
 const { HandleSetTypeAllTasks } = require("./components/type-all-tasks.cjs");
 const { HandleHelp } = require("./components/help-user.cjs");
 const { HandleSearchNotifications } = require('./components/notification.cjs')
+
+const { performBackup } = require('./modules/backup.cjs');
+
 // minor utils
 const commands = argv.slice(2);
 const TASK_LIST = commands[0];
-// paths
-const originalFilePath = path.join(__dirname, "tasks.json");
-const backupFolderPath = path.join(__dirname, "backup");
-const backupFilePath = path.join(backupFolderPath, "backup.json");
-// retry again after an error
-const MAX_RETRIES = 5;
-const TIME_TO_RETRIES = 2000;
 
-async function HandleDirectoryIfDidNotExist() {
-  try {
-    await fs.access(backupFolderPath);
-  } catch (err) {
-    if (err.code === "ENOENT") {
-      await fs.mkdir(backupFolderPath);
-      console.log(`✅ Diretório de backup criado com sucesso!`);
-      console.log(
-        `🔷 Se necessário, cheque manualmente o arquivo de backup manualmente`
-      );
-    }
-  }
-}
-async function HandleCopyFile(src, dist, retries = 0) {
-  try {
-    await fs.copyFile(src, dist);
-    console.log(`✅ Backup atualizado com sucesso!`);
-  } catch (err) {
-    if (err.code === "EBUSY" && retries < MAX_RETRIES) {
-      console.warn(
-        `Um erro ocorreu durante o processo de backup, tentando
-          novamente em ${TIME_TO_RETRIES} segundos
-        `.trim()
-      );
 
-      await new Promise((resolve) => setTimeout(resolve, TIME_TO_RETRIES));
-      return HandleCopyFile(src, dist, retries + 1);
-    } else {
-      console.error(`❌ Não foi possível realizar o backup`, err);
-    }
-  }
-}
-async function HandleBeckup() {
-  try {
-    await HandleDirectoryIfDidNotExist();
-    await HandleCopyFile(originalFilePath, backupFilePath);
-  } catch (err) {
-    console.error(err.message.trim());
-  }
-}
+
 async function HandleUpdateTasks() {
   try {
     const JSON_BUFFER = await HandleReadTaskFile();
@@ -555,7 +513,7 @@ switch (commands[1]) {
     HandleHelp();
     break;
   case "run":
-    HandleBeckup();
+    performBackup();
     break;
   case "show":
     HandleSearchNotifications(HandleReadTaskFile, HandleWriteFile, HandleGetDate);
