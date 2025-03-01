@@ -14,7 +14,7 @@ As tarefas são organizadas em listas, sendo 4 delas padrões (já vem por padr�
 ```json
 [
   {
-    daily: [
+    "daily": [
       {
         "name": "",
         "id": 4,
@@ -26,9 +26,9 @@ As tarefas são organizadas em listas, sendo 4 delas padrões (já vem por padr�
         "streak": 0
       }
     ],
-    study: [],
-    entreteiment: [],
-    revision: [],
+    "study": [],
+    "entretainment": [],
+    "revision": [],
   }
 ]
 ```
