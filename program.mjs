@@ -10,6 +10,7 @@ import { HandleHelp } from './components/help-user.mjs';
 import { HandleSearchNotifications } from './components/notification.mjs';
 import { performBackup } from './modules/backup.mjs';
 import { HandleDeleteField } from './components/delete-field.mjs';
+import { readTasksFromJson } from './modules/readTasksFromJson.mjs';
 
 // minor utils
 const commands = argv.slice(2);
@@ -17,7 +18,7 @@ const TASK_LIST = commands[0];
 
 async function HandleUpdateTasks() {
   try {
-    const JSON_BUFFER = await HandleReadTaskFile();
+    const JSON_BUFFER = await readTasksFromJson();
 
     if (commands[2] && !isNaN(commands[2]) && commands[3]) {
       HandleUpdateElementAttribute.call(
@@ -64,7 +65,7 @@ async function HandleUpdateTasks() {
 }
 async function HandleAddTasks() {
   try {
-    const JSON_BUFFER = await HandleReadTaskFile();
+    const JSON_BUFFER = await readTasksFromJson();
 
     if (commands[2]) {
       JSON_BUFFER[0][TASK_LIST].push({
@@ -99,7 +100,7 @@ async function HandleAddTasks() {
 }
 async function HandleDeleteTask() {
   try {
-    const JSON_BUFFER = await HandleReadTaskFile();
+    const JSON_BUFFER = await readTasksFromJson();
 
     if (commands[2]) {
       const tasksFiltred = JSON_BUFFER[0][TASK_LIST].filter((item) => {
@@ -134,7 +135,7 @@ async function HandleListTasks() {
       return arr.length === 0 ? "Sem tarefas!" : arr;
     }
 
-    const jsonBuffer = await HandleReadTaskFile();
+    const jsonBuffer = await readTasksFromJson();
 
     switch (commands[2]) {
       case undefined:
@@ -179,7 +180,7 @@ async function HandleListTasks() {
 }
 async function HandleSetTaskStatus(sts) {
   try {
-    const JSON_BUFFER = await HandleReadTaskFile();
+    const JSON_BUFFER = await readTasksFromJson();
 
     if (commands[2]) {
       await HandleUpdateElementAttribute.call(
@@ -208,7 +209,7 @@ async function HandleSetTaskStatus(sts) {
 }
 async function HandleDeleteAllTasks() {
   try {
-    const JSON_BUFFER = await HandleReadTaskFile();
+    const JSON_BUFFER = await readTasksFromJson();
 
     JSON_BUFFER[0][TASK_LIST] = [];
 
@@ -226,7 +227,7 @@ async function HandleDeleteAllTasks() {
 }
 async function HandleMarkAllTasks(sts) {
   try {
-    const JSON_BUFFER = await HandleReadTaskFile();
+    const JSON_BUFFER = await readTasksFromJson();
 
     for (element of JSON_BUFFER[0][TASK_LIST]) {
       element.status = sts;
@@ -244,7 +245,7 @@ async function HandleMarkAllTasks(sts) {
 }
 async function HandleSetTypeOfTask() {
   try {
-    const JSON_BUFFER = await HandleReadTaskFile();
+    const JSON_BUFFER = await readTasksFromJson();
 
     if (!isNaN(commands[2]) && commands[2] && commands[3]) {
       HandleUpdateElementAttribute.call(
@@ -284,7 +285,7 @@ async function HandleSetTypeOfTask() {
 }
 async function HandleSetDateConclusion() {
   try {
-    const JSON_BUFFER = await HandleReadTaskFile();
+    const JSON_BUFFER = await readTasksFromJson();
 
     if (commands[2] && commands[3]) {
       const dateFormater = /^(0[1-9]|1[0-2])\/(0[1-9]|[12]\d|3[01])\/(\d{4})$/;
@@ -335,7 +336,7 @@ async function HandleSetDateConclusion() {
 }
 async function HandleSetDateConclusionToAllTasks() {
   try {
-    const JSON_BUFFER = await HandleReadTaskFile();
+    const JSON_BUFFER = await readTasksFromJson();
     const dateFormater = /^(0[1-9]|1[0-2])\/(0[1-9]|[12]\d|3[01])\/(\d{4})$/;
 
     if (dateFormater.test(commands[2])) {
@@ -364,30 +365,7 @@ function HandleGenerateTasksId(dataArray) {
   let maxId = dataArray.reduce((max, item) => Math.max(max, item.id || 0), 0);
   return maxId + 1;
 }
-export async function HandleReadTaskFile() {
-  try {
-    try {
-      const jsonData = await fs.readFile("tasks.json");
-      return JSON.parse(jsonData);
-    } catch (readErr) {
-      if (readErr.code === "ENOENT") {
-        const tasksStructure = [
-          { daily: [], study: [], entertainment: [], revision: [] }, []
-        ];
-        await fs.writeFile(
-          "tasks.json",
-          JSON.stringify(tasksStructure, null, 2)
-        );
-        return tasksStructure;
-      } else {
-        throw readErr;
-      }
-    }
-  } catch (err) {
-    console.error("❗ Erro ao ler o arquivo:", err);
-    process.exit(1);
-  }
-}
+
 function HandleGetDate() {
   const dateObject = new Date();
 
@@ -492,13 +470,13 @@ switch (commands[1]) {
     HandleSetDateConclusionToAllTasks();
     break;
   case "add-field":
-    HandleCreateNewFieldToTasks(HandleReadTaskFile, HandleWriteFile);
+    HandleCreateNewFieldToTasks(readTasksFromJson, HandleWriteFile);
     break;
   case "delete-field":
-    HandleDeleteField(HandleReadTaskFile, HandleWriteFile);
+    HandleDeleteField(readTasksFromJson, HandleWriteFile);
     break;
   case "type-all":
-    HandleSetTypeAllTasks(HandleReadTaskFile, HandleWriteFile);
+    HandleSetTypeAllTasks(readTasksFromJson, HandleWriteFile);
     break;
   case "all":
     HandleHelp();
@@ -507,7 +485,7 @@ switch (commands[1]) {
     performBackup();
     break;
   case "show":
-    HandleSearchNotifications(HandleReadTaskFile, HandleWriteFile, HandleGetDate);
+    HandleSearchNotifications(readTasksFromJson, HandleWriteFile, HandleGetDate);
     break;
   default:
     (() => {

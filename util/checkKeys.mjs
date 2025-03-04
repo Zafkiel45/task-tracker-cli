@@ -1,5 +1,5 @@
 import { argv } from 'node:process';
-import { HandleReadTaskFile } from '../program.mjs';
+import { readTasksFromJson } from '../modules/readTasksFromJson.mjs';
 
 async function HandleReadFile() {
     try {
@@ -9,7 +9,7 @@ async function HandleReadFile() {
         const isNotification = argv[2] !== 'notification';
 
         if(isTaskField && isHelp && isBackup && isNotification) {
-            const task = await HandleReadTaskFile();
+            const task = await readTasksFromJson();
             const key = Object.keys(task[0]);
     
             const commandExist = key.find((item) => {
