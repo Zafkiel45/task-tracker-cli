@@ -1,4 +1,4 @@
-class GenericErrors extends Error {
+export class GenericErrors extends Error {
     constructor(message, type) {
         super(message);
 
@@ -6,9 +6,5 @@ class GenericErrors extends Error {
         this.type = type;
 
         Error.captureStackTrace(this, this.constructor);
-    }
-}
-
-module.exports = {
-    GenericErrors
-}
+    };
+};

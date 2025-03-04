@@ -1,8 +1,8 @@
-const path = require("path");
-const fs = require("fs").promises;
+import path from 'node:path';
+import fs from 'node:fs/promises';
 
-const originalFilePath = path.join(__dirname, "tasks.json");
-const backupFolderPath = path.join(__dirname, "backup");
+const originalFilePath = path.join(import.meta.dirname, "tasks.json");
+const backupFolderPath = path.join(import.meta.dirname, "backup");
 const backupFilePath = path.join(backupFolderPath, "backup.json");
 
 const MAX_RETRIES = 5;
@@ -37,7 +37,8 @@ async function attemptCopyFile(src, dist, retries = 0) {
     }
   }
 }
-async function performBackup() {
+
+export async function performBackup() {
   try {
     await ensureBackupDirectoryExists();
     await attemptCopyFile(originalFilePath, backupFilePath);
@@ -45,7 +46,3 @@ async function performBackup() {
     console.error(err.message.trim());
   }
 }
-
-module.exports = {
-  performBackup,
-};

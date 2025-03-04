@@ -19,7 +19,7 @@ const commands = {
     "configuration-task-field": "Usado para alterar a estrutura geral da aplicação, adicionando ou apagando listas",
 };
 
-function HandleHelp() {
+export function HandleHelp() {
     console.log('---------------------------')
     console.log(`⚠️ Para informalções detalhadas sobre cada comando, visite:"`);
     console.log(`https://github.com/Zafkiel45/task-tracker-cli`);
@@ -31,9 +31,5 @@ function HandleHelp() {
         console.log('\x1b[32m%s\x1b[0m %s',`comando: 🟦 ${element}:`, `${commands[element]}`);
     };
 };
-
-module.exports = {
-    HandleHelp,
-}
 
 

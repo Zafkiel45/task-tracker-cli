@@ -1,28 +1,19 @@
 #!/user/bin/env node
-const { argv } = require("node:process");
-const fs = require("node:fs/promises");
-const path = require("path");
-
-module.exports = {
-  HandleReadTaskFile,
-};
-// module imports
-const { GenericErrors } = require("./util/error.cjs");
-const {
-  HandleCreateNewFieldToTasks,
-} = require("./components/create-new-field.cjs");
-const { HandleDeleteField } = require("./components/delete-field.cjs");
-const { HandleSetTypeAllTasks } = require("./components/type-all-tasks.cjs");
-const { HandleHelp } = require("./components/help-user.cjs");
-const { HandleSearchNotifications } = require('./components/notification.cjs')
-
-const { performBackup } = require('./modules/backup.cjs');
+// packages from Node.js
+import { argv } from 'node:process';
+import fs from 'node:fs/promises';
+// Modules 
+import { GenericErrors } from './util/error.mjs';
+import { HandleCreateNewFieldToTasks } from './components/create-new-field.mjs';
+import { HandleSetTypeAllTasks } from './components/type-all-tasks.mjs';
+import { HandleHelp } from './components/help-user.mjs';
+import { HandleSearchNotifications } from './components/notification.mjs';
+import { performBackup } from './modules/backup.mjs';
+import { HandleDeleteField } from './components/delete-field.mjs';
 
 // minor utils
 const commands = argv.slice(2);
 const TASK_LIST = commands[0];
-
-
 
 async function HandleUpdateTasks() {
   try {
@@ -373,7 +364,7 @@ function HandleGenerateTasksId(dataArray) {
   let maxId = dataArray.reduce((max, item) => Math.max(max, item.id || 0), 0);
   return maxId + 1;
 }
-async function HandleReadTaskFile() {
+export async function HandleReadTaskFile() {
   try {
     try {
       const jsonData = await fs.readFile("tasks.json");

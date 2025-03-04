@@ -1,6 +1,6 @@
 @echo off
 REM Check if the list exist
-node util/checkKeys.cjs %1
+node util/checkKeys.mjs %1
 
 if errorlevel 1 (
     echo Invalid list. Please use a valid list from tasks.json.
@@ -38,4 +38,4 @@ exit /b
 
 :execute
 REM Execute the Node.js script with all the original arguments
-node program.cjs %*
+node program.mjs %*

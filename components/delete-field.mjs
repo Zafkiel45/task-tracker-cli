@@ -1,6 +1,6 @@
-const { HandleCatchingTheUserInput } = require('./create-new-field.cjs');
+import { HandleCatchingTheUserInput } from './create-new-field.mjs';
 
-async function HandleDeleteField(JSON_TASK, HandleWrite) {
+export async function HandleDeleteField(JSON_TASK, HandleWrite) {
     try {
         const currentTasks = await JSON_TASK();
         const userInput = await HandleCatchingTheUserInput();
@@ -27,8 +27,4 @@ async function HandleDeleteField(JSON_TASK, HandleWrite) {
         console.error(`Um erro ocorreu:`, err);
     }
 
-}
-
-module.exports = {
-    HandleDeleteField
 }

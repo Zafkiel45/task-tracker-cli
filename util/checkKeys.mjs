@@ -1,5 +1,5 @@
-const { argv } = require('node:process');
-const { HandleReadTaskFile } = require('../program.cjs');
+import { argv } from 'node:process';
+import { HandleReadTaskFile } from '../program.mjs';
 
 async function HandleReadFile() {
     try {

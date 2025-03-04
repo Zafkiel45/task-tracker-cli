@@ -1,4 +1,4 @@
-async function HandleCatchingTheUserInput() {
+export async function HandleCatchingTheUserInput() {
     console.warn(`💡 Digite "exit" para encerrar encerrar o processo`);
     console.log(`🔷 Para criar listas apenas digite um nome de alguma lista que ainda não existe sem espaço entre as palavras.`.trim());
     console.log(`🔷 para deletar listas, basta digitar o nome de alguma lista existente e apertar "Enter".`.trim());
@@ -27,7 +27,7 @@ async function HandleCatchingTheUserInput() {
         }); 
     })
 };
-async function HandleCreateNewFieldToTasks(JSON_TASK, HandleWriteFile) {
+export async function HandleCreateNewFieldToTasks(JSON_TASK, HandleWriteFile) {
     const taskObject = await JSON_TASK();
     const userInput = await HandleCatchingTheUserInput();
 
@@ -45,8 +45,3 @@ async function HandleCreateNewFieldToTasks(JSON_TASK, HandleWriteFile) {
         process.exit(1);
     };
 };
-
-module.exports = {
-    HandleCreateNewFieldToTasks,
-    HandleCatchingTheUserInput,
-}

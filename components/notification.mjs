@@ -1,4 +1,4 @@
-async function HandleSearchNotifications(JSON,HandleWrite, HandleGetDate) {
+export async function HandleSearchNotifications(JSON,HandleWrite, HandleGetDate) {
     try {
         const currentTasks = await JSON();
         const currentDate  = HandleGetDate();
@@ -50,8 +50,4 @@ async function HandleAlertNotification(lengthNotifications, tasksToday) {
         console.error(`❗ Ops...parece que ocorreu um erro ao buscar notificações`, err);
         process.exit(1);
     }
-};
-
-module.exports = {
-    HandleSearchNotifications
 };
