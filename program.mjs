@@ -8,7 +8,7 @@ import { HandleCreateNewFieldToTasks } from './components/create-new-field.mjs';
 import { HandleSetTypeAllTasks } from './components/type-all-tasks.mjs';
 import { HandleHelp } from './components/help-user.mjs';
 import { HandleSearchNotifications } from './components/notification.mjs';
-import { performBackup } from './modules/backup.mjs';
+import { performBackup } from './modules/backup.ts';
 import { HandleDeleteField } from './components/delete-field.mjs';
 import { readTasksFromJson } from './modules/readTasksFromJson.mjs';
 

@@ -1,5 +1,7 @@
-import path from 'node:path';
-import fs from 'node:fs/promises';
+import path from "node:path";
+import fs from "node:fs/promises";
+// utils
+import { internalError } from "../util/internalError";
 
 const originalFilePath = path.join(import.meta.dirname, "tasks.json");
 const backupFolderPath = path.join(import.meta.dirname, "backup");
@@ -11,21 +13,30 @@ const TIME_TO_RETRIES = 2000;
 async function ensureBackupDirectoryExists() {
   try {
     await fs.access(backupFolderPath);
-  } catch (err) {
+  } catch (err: any) {
+
+    if (typeof err.code !== "string") {
+      throw internalError("❌ the object is not a ErrnoException");
+    }
+
     if (err.code === "ENOENT") {
       await fs.mkdir(backupFolderPath);
       console.log(`✅ Diretório de backup criado com sucesso!`);
-    } else console.error(`❌ Um erro inesperado correu: ${err}`);
+    } else throw internalError("O objeto não é um ErrnoException");
   }
 }
 
-async function attemptCopyFile(src, dist, retries = 0) {
+async function attemptCopyFile(src: string, dist: string, retries = 0) {
   try {
     await fs.copyFile(src, dist);
     console.log(`✅ Backup atualizado com sucesso!`);
-  } catch (err) {
-    if (err.code === "EBUSY" && retries < MAX_RETRIES) {
+  } catch (err: any) {
 
+    if (typeof err.code !== "string") {
+      throw internalError("❌ O object não é um ErrnoException");
+    };
+
+    if (err.code === "EBUSY" && retries < MAX_RETRIES) {
       console.warn(
         `❌ Ocorreu um erro, tentando realizar o backup novamente em ${TIME_TO_RETRIES}`
       );
@@ -42,7 +53,7 @@ export async function performBackup() {
   try {
     await ensureBackupDirectoryExists();
     await attemptCopyFile(originalFilePath, backupFilePath);
-  } catch (err) {
+  } catch (err: any) {
     console.error(err.message.trim());
   }
 }
