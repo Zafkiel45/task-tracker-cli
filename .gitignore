@@ -2,3 +2,4 @@ tasks.json
 /backup
 streak.cjs
 streak.json
+/node_modules
