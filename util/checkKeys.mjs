@@ -1,5 +1,5 @@
 import { argv } from 'node:process';
-import { readTasksFromJson } from '../modules/readTasksFromJson.mjs';
+import { readTasksFromJson } from '../modules/readTasksFromJson.js';
 
 async function HandleReadFile() {
     try {
