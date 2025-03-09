@@ -10,7 +10,7 @@ import { HandleHelp } from './components/help-user.mjs';
 import { HandleSearchNotifications } from './components/notification.mjs';
 import { performBackup } from './modules/backup.ts';
 import { HandleDeleteField } from './components/delete-field.mjs';
-import { readTasksFromJson } from './modules/readTasksFromJson.js';
+import { readTasksFromJson } from './modules/readTasksFromJson.ts';
 
 // minor utils
 const commands = argv.slice(2);
