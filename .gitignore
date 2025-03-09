@@ -3,3 +3,4 @@ tasks.json
 streak.cjs
 streak.json
 /node_modules
+/database
