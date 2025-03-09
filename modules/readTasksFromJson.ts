@@ -5,11 +5,11 @@ interface FileSignature {
   revision: any[],
 };
 
-type FileData = [FileSignature, any[]] | never[]; 
+export type FileData = [FileSignature, any[]] | never[]; 
 
 const fileName = "tasks.json";
 
-export async function readTasksFromJson():Promise<void | string | FileData> {
+export async function readTasksFromJson():Promise<void | FileData> {
   try {
     const file = Bun.file("./database/tasks.json", {type: "application/json"});
 

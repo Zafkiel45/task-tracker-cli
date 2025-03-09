@@ -1,6 +1,6 @@
 @echo off
 REM Check if the list exist
-node util/checkKeys.mjs %1
+node util/checkKeys.ts %1
 
 if errorlevel 1 (
     echo Invalid list. Please use a valid list from tasks.json.
